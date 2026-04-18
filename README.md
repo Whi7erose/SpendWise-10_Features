@@ -1,4 +1,5 @@
-# SpendWise — CW2 Prototype
+# SpendWise 
+# Google Sites link - https://sites.google.com/iit.ac.lk/spendwiselk/home
 
 Prototype concept webpage for SpendWise — a personal budgeting app idea. Built for fun as a pet project.
 
