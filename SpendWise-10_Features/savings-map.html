@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise — Feature 04: Geolocation Savings Map | CW2 Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* ─── AMBIENT BG ─── */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,232,122,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,0.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);}
+.bg-glow{position:fixed;top:-15%;left:50%;transform:translateX(-50%);width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,232,122,0.08) 0%,rgba(26,140,255,0.04) 45%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb{position:fixed;bottom:5%;left:-8%;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(26,140,255,0.05),transparent 70%);pointer-events:none;z-index:0;}
+
+/* ─── NAV ─── */
+.proto-nav{display:flex;align-items:center;justify-content:space-between;padding:13px 40px;background:rgba(5,14,31,0.85);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.nav-left{display:flex;align-items:center;gap:16px;}
+.proto-logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.proto-logo span{color:var(--green);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 10px;border-radius:8px;color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;letter-spacing:0.3px;}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(0,232,122,0.12);color:var(--green);border-color:rgba(0,232,122,0.25);}
+.proto-badge{font-family:var(--mono);font-size:10px;background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:4px 12px;border-radius:100px;font-weight:500;letter-spacing:0.5px;}
+
+/* ─── PAGE WRAP ─── */
+.page-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 40px 100px;}
+
+/* ─── HERO ─── */
+.page-hero{margin-bottom:56px;}
+.page-tag{display:inline-flex;align-items:center;gap:9px;background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.22);color:var(--green);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+.page-h1{font-size:clamp(38px,5.5vw,62px);font-weight:800;color:#fff;line-height:1.07;letter-spacing:-2.5px;margin-bottom:18px;}
+.page-h1 em{font-style:normal;background:linear-gradient(135deg,var(--green) 0%,#00d4f0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;font-weight:700;}
+
+/* ─── STAT CHIPS ─── */
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 0;}
+.stat-chip{background:rgba(11,26,49,0.8);border:1px solid var(--border2);border-radius:14px;padding:16px 22px;text-align:center;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s;}
+.stat-chip:hover{border-color:rgba(0,232,122,0.35);transform:translateY(-2px);}
+.stat-chip .num{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;background:linear-gradient(135deg,var(--green),#00d4f0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-chip .lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+
+/* ─── SEC LABEL ─── */
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--text3);}
+
+/* ─── MAIN LAYOUT ─── */
+.main-layout{display:grid;grid-template-columns:1.35fr 0.65fr;gap:32px;align-items:start;}
+
+/* ─── MAP PANEL ─── */
+.map-panel{
+  background:rgba(11,26,49,0.9);
+  border:1.5px solid var(--border2);border-radius:22px;overflow:hidden;
+  backdrop-filter:blur(16px);
+  box-shadow:0 24px 64px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.map-panel-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.02);
+  position: relative;
+  z-index: 10;
+}
+.map-header-left{display:flex;align-items:center;gap:10px;}
+.map-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 2s ease infinite;}
+.map-title{font-size:13px;font-weight:700;color:#fff;}
+.map-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px;}
+.map-radius-badge{font-family:var(--mono);font-size:10px;background:rgba(26,140,255,0.1);color:var(--blue);border:1px solid rgba(26,140,255,0.2);padding:4px 12px;border-radius:100px;letter-spacing:0.3px;}
+
+/* ─── REALISTIC MAP CANVAS ─── */
+.map-canvas{
+  position:relative;
+  height:380px;
+  background: var(--navy3);
+  overflow: hidden;
+}
+.real-map-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none; /* Let clicks pass through to the pins */
+  /* This filter turns the light OpenStreetMap into a seamless dark-theme radar map */
+  filter: invert(100%) hue-rotate(195deg) brightness(85%) contrast(120%) sepia(10%);
+  z-index: 1;
+  opacity: 0.7;
+}
+.map-overlay-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 40% 50%, transparent 30%, rgba(11,26,49,0.85) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* user pin */
+.user-marker{
+  position:absolute;transform:translate(-50%,-50%);z-index:8;
+}
+.user-pulse-ring{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(26,140,255,0.12);border:1px solid rgba(26,140,255,0.3);
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:ripple 2.5s ease-out infinite;
+}
+.user-pulse-ring-2{animation-delay:1.2s;}
+@keyframes ripple{0%{transform:translate(-50%,-50%) scale(1);opacity:0.7}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
+.user-core{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--blue);border:3px solid #fff;
+  box-shadow:0 0 0 4px rgba(26,140,255,0.25),0 4px 12px rgba(0,0,0,0.4);
+  position:relative;z-index:1;
+}
+
+/* store pins */
+.map-pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;z-index:10;transition:transform .2s,z-index 0s;}
+.map-pin:hover{transform:translate(-50%,-100%) scale(1.08);z-index:20;}
+.map-pin.active-pin{transform:translate(-50%,-100%) scale(1.12);z-index:25;}
+
+.pin-card{
+  border:1.5px solid;border-radius:12px;padding:9px 13px;
+  background:rgba(5,14,31,0.92);
+  box-shadow:0 8px 28px rgba(0,0,0,0.5);
+  white-space:nowrap;transition:box-shadow .2s;
+  backdrop-filter:blur(8px);
+}
+.map-pin:hover .pin-card,.map-pin.active-pin .pin-card{box-shadow:0 12px 36px rgba(0,0,0,0.6);}
+.pin-store{font-size:12px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+.pin-saving{font-size:11px;font-weight:600;margin-top:2px;font-family:var(--mono);}
+.pin-stem{width:2px;height:10px;margin:0 auto;border-radius:0 0 2px 2px;}
+
+/* scan radius ring */
+.scan-ring{
+  position:absolute;border-radius:50%;border:1.5px dashed rgba(0,232,122,0.2);
+  background:rgba(0,232,122,0.025);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  z-index: 3;
+}
+
+/* ─── MAP LEGEND ─── */
+.map-legend{
+  padding:12px 20px;
+  border-top:1px solid var(--border);
+  display:flex;gap:20px;align-items:center;flex-wrap:wrap;
+  background:rgba(255,255,255,0.01);
+  position: relative;
+  z-index: 10;
+}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.2px;}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+/* ─── STORE DETAIL PANEL ─── */
+.store-detail{
+  margin-top:14px;
+  background:rgba(11,26,49,0.9);
+  border:1.5px solid rgba(0,232,122,0.2);
+  border-radius:18px;padding:20px;
+  backdrop-filter:blur(12px);
+  animation:slideDetail .3s ease both;
+  display:none;
+}
+@keyframes slideDetail{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.store-detail.visible{display:block;}
+.sd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.sd-name{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.sd-cat{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.3px;}
+.sd-price{font-size:24px;font-weight:800;font-family:var(--mono);letter-spacing:-0.5px;flex-shrink:0;}
+.sd-deal{font-size:13px;color:var(--text2);line-height:1.6;padding-top:12px;border-top:1px solid var(--border);}
+.sd-actions{display:flex;gap:10px;margin-top:16px;}
+.sd-btn-primary{flex:1;background:var(--green);color:var(--navy);border:none;border-radius:10px;padding:11px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.sd-btn-primary:hover{background:var(--green2);transform:translateY(-1px);}
+.sd-btn-close{background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;}
+.sd-btn-close:hover{border-color:var(--border2);color:var(--text);}
+
+/* ─── STORE LIST ─── */
+.store-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.store-row{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(11,26,49,0.8);border:1px solid var(--border);
+  border-radius:13px;padding:13px 14px;
+  cursor:pointer;transition:all .2s;
+}
+.store-row:hover{border-color:var(--border2);transform:translateX(3px);}
+.store-row.selected{border-color:rgba(0,232,122,0.3);background:rgba(0,232,122,0.04);}
+.sr-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid;}
+.sr-body{flex:1;min-width:0;}
+.sr-name{font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+.sr-dist{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;}
+.sr-saving{font-family:var(--mono);font-size:12px;font-weight:500;flex-shrink:0;}
+.sr-arrow{font-size:12px;color:var(--text3);opacity:0;transition:all .2s;flex-shrink:0;}
+.store-row:hover .sr-arrow{opacity:1;transform:translateX(3px);}
+
+/* ─── RIGHT: STEPS + INFO ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.step-item-row{display:flex;gap:16px;align-items:flex-start;position:relative;}
+.step-item-row:not(:last-child)::after{content:'';position:absolute;left:17px;top:40px;width:2px;height:calc(100% + 4px);background:linear-gradient(to bottom,rgba(0,232,122,0.25),rgba(0,232,122,0.04));}
+.step-num-circle{width:36px;height:36px;border-radius:50%;background:rgba(0,232,122,0.08);border:1.5px solid rgba(0,232,122,0.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--green);flex-shrink:0;transition:all .2s;}
+.step-item-row:hover .step-num-circle{background:rgba(0,232,122,0.15);border-color:rgba(0,232,122,0.5);}
+.step-body{padding-bottom:24px;flex:1;}
+.step-body h4{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-0.2px;}
+.step-body p{font-size:12px;color:var(--text2);line-height:1.65;}
+
+.info-card{background:rgba(11,26,49,0.8);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(10px);transition:all .25s;margin-top:14px;}
+.info-card:hover{border-color:rgba(0,232,122,0.2);transform:translateY(-2px);}
+.limit-box{background:rgba(255,203,71,0.04);border:1px solid rgba(255,203,71,0.18);border-radius:14px;padding:16px 20px;margin-top:14px;}
+.limit-box h5{font-family:var(--mono);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;}
+.limit-box p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+
+/* ─── PROTO NOTICE ─── */
+.proto-notice{display:flex;align-items:flex-start;gap:14px;background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.16);border-radius:14px;padding:16px 20px;margin-top:48px;}
+.proto-notice p{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.proto-notice p strong{color:var(--blue);}
+
+/* ─── PAGE NAV ─── */
+.page-nav{display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+.page-nav a{font-family:var(--mono);font-size:12px;color:var(--green);text-decoration:none;font-weight:500;transition:opacity .2s;}
+.page-nav a:hover{opacity:0.7;}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .65s ease both;}
+.anim-up-2{animation:fadeUp .65s ease 0.1s both;}
+.anim-up-3{animation:fadeUp .65s ease 0.2s both;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .page-wrap{padding:40px 20px 80px;}
+  .proto-pages{display:none;}
+  .main-layout{grid-template-columns:1fr;}
+}
+@media(max-width:500px){
+  .stat-strip{gap:8px;}
+  .map-legend{gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb"></div>
+
+
+
+<div class="page-wrap">
+
+  <div class="page-hero anim-up">
+  
+    <h1 class="page-h1">Geolocation<br><em>Savings Map</em></h1>
+    <p class="page-sub">
+      A real-time map of nearby retailers <strong>colour-coded by price gap</strong> against your usual spending. Green pins mean you'll save — tap any to see the exact LKR saving and get walking directions instantly.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">600m</div><div class="lbl">Default scan radius</div></div>
+      <div class="stat-chip"><div class="num">Live</div><div class="lbl">Retailer discount data</div></div>
+      <div class="stat-chip"><div class="num">LKR</div><div class="lbl">Saving shown per store</div></div>
+      <div class="stat-chip"><div class="num">1-tap</div><div class="lbl">Navigate to savings</div></div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+
+    <div class="anim-up-2">
+
+      <div class="map-panel">
+        <div class="map-panel-header">
+          <div class="map-header-left">
+            <div class="map-live-dot"></div>
+            <div>
+              <div class="map-title">Savings Map — Nugegoda, Colombo 6</div>
+              <div class="map-sub">TAP ANY PIN TO SEE SAVING DETAILS</div>
+            </div>
+          </div>
+          <div class="map-radius-badge">📡 600m radius</div>
+        </div>
+
+        <div class="map-canvas" id="map-canvas">
+
+          <iframe class="real-map-iframe" src="https://www.openstreetmap.org/export/embed.html?bbox=79.8700,6.8550,79.9100,6.8850&layer=mapnik"></iframe>
+          <div class="map-overlay-vignette"></div>
+
+          <div class="scan-ring" style="left:40%;top:50%;width:200px;height:200px;margin-left:-100px;margin-top:-100px;"></div>
+
+          <div class="user-marker" style="left:40%;top:50%;">
+            <div class="user-pulse-ring"></div>
+            <div class="user-pulse-ring user-pulse-ring-2"></div>
+            <div class="user-core"></div>
+          </div>
+
+          <div class="map-pin" id="pin-0" style="left:25%;top:50%;" onclick="selectStore(0)">
+            <div class="pin-card" style="border-color:rgba(255,77,109,0.5);">
+              <div class="pin-store">🏪 Keells Super</div>
+              <div class="pin-saving" style="color:var(--red);">LKR 4,200 — Your usual</div>
+            </div>
+            <div class="pin-stem" style="background:var(--red);"></div>
+          </div>
+
+          <div class="map-pin" id="pin-1" style="left:57%;top:35%;" onclick="selectStore(1)">
+            <div class="pin-card" style="border-color:rgba(0,232,122,0.5);">
+              <div class="pin-store">🛒 Cargills FoodCity</div>
+              <div class="pin-saving" style="color:var(--green);">Save LKR 840 ✓</div>
+            </div>
+            <div class="pin-stem" style="background:var(--green);"></div>
+          </div>
+
+          <div class="map-pin" id="pin-2" style="left:74%;top:24%;" onclick="selectStore(2)">
+            <div class="pin-card" style="border-color:rgba(0,232,122,0.5);">
+              <div class="pin-store">🏬 Lanka Sathosa</div>
+              <div class="pin-saving" style="color:var(--green);">Save LKR 1,100 ✓</div>
+            </div>
+            <div class="pin-stem" style="background:var(--green);"></div>
+          </div>
+
+          <div class="map-pin" id="pin-3" style="left:64%;top:68%;" onclick="selectStore(3)">
+            <div class="pin-card" style="border-color:rgba(255,203,71,0.5);">
+              <div class="pin-store">🏢 Arpico Super</div>
+              <div class="pin-saving" style="color:var(--gold);">Save LKR 150 ✓</div>
+            </div>
+            <div class="pin-stem" style="background:var(--gold);"></div>
+          </div>
+
+        </div><div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Cheaper than usual</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gold);"></div>Slight saving</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div>Your current store</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--blue);box-shadow:0 0 0 2px rgba(26,140,255,0.3);"></div>Your location</div>
+        </div>
+      </div><div class="store-detail" id="store-detail">
+        <div class="sd-top">
+          <div>
+            <div class="sd-name" id="sd-name"></div>
+            <div class="sd-cat" id="sd-cat"></div>
+          </div>
+          <div class="sd-price" id="sd-price"></div>
+        </div>
+        <div class="sd-deal" id="sd-deal"></div>
+        <div class="sd-actions">
+          <button class="sd-btn-primary" onclick="alert('Final version: hands off to Google Maps navigation')">Get Directions →</button>
+          <button class="sd-btn-close" onclick="closeDetail()">Dismiss</button>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="sec-label">Nearby Stores — Ranked by Saving</div>
+        <div class="store-list" id="store-list"></div>
+      </div>
+
+    </div><div class="anim-up-3">
+
+      <div class="sec-label">How It Works</div>
+      <div class="step-flow">
+        <div class="step-item-row">
+          <div class="step-num-circle">1</div>
+          <div class="step-body">
+            <h4>Map Opens from Alert or Dashboard</h4>
+            <p>Launched via a pre-purchase alert tap (Feature 01) or from the dashboard. Current GPS position is centred; 600m radius is scanned for participating retailers.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">2</div>
+          <div class="step-body">
+            <h4>Retailer Discount Data Fetched</h4>
+            <p>SpendWise queries the B2B retailer API for all stores within radius — returning store name, active promotions, and estimated basket price for the user's top purchased categories.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">3</div>
+          <div class="step-body">
+            <h4>Price Gap Calculated & Colour-Coded</h4>
+            <p>Historical spend at the user's usual store is compared to current prices at each nearby store. LKR saving per trip is calculated and pins are coloured: green = save significantly, gold = slight saving, red = your current.</p>
+          </div>
+        </div>
+        <div class="step-item-row" style="padding-bottom:0;">
+          <div class="step-num-circle">4</div>
+          <div class="step-body" style="padding-bottom:0;">
+            <h4>One-Tap Navigation Handoff</h4>
+            <p>Tapping a pin opens the detail card showing the active discount, estimated saving, and distance. "Get Directions" hands off to Google Maps with the destination pre-loaded.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="sec-label">Traceability</div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.65;margin-top:4px;">This functionality is implemented as a map-based extension of UC3 and serves the Geolocation-Based Saver persona. It connects directly to the Porter Value Chain feedback loop: retailers provide discount data → SpendWise notifies users → users choose lower‑cost nearby stores → retailers gain increased footfall → the cycle reinforces itself.</p>
+      </div>
+
+      <div class="limit-box">
+        <h5>⚠ Prototype Limitation</h5>
+        <p>The map uses a live OpenStreetMap embed styled for the dark theme. The pins and interactions are CSS-rendered over the map to demonstrate the intended UI flow. Final version uses the Google Maps JavaScript SDK with dynamic overlay markers. Retailer pricing data is seeded — live version requires a B2B retailer API updated daily by participating merchants.</p>
+      </div>
+
+    </div></div><div class="proto-notice">
+    <span style="font-size:15px;flex-shrink:0;">ℹ️</span>
+    <p><strong>Prototype Note:</strong> The map above embeds a real OpenStreetMap styled to match the dark theme. Pin and list-row clicks demonstrate the full store detail flow. Final implementation uses Google Maps JavaScript SDK with custom markers, a Geolocation API, and a live retailer discount database updated daily via B2B partnerships.</p>
+  </div>
+
+  <div class="page-nav">
+    <a href="sms-tracking.html">← Page 03: SMS Transaction Feed</a>
+    <a href="voice-logging.html">Page 05: Voice Expense Logger →</a>
+  </div>
+
+</div>
+
+<script>
+const stores = [
+  {
+    id: 0, name: 'Keells Super Nugegoda', cat: 'GROCERIES · YOUR CURRENT STORE',
+    price: 'LKR 4,200', saving: null,
+    color: 'var(--red)', borderColor: 'rgba(255,77,109,0.3)',
+    iconBg: 'rgba(255,77,109,0.1)', iconBorder: 'rgba(255,77,109,0.25)',
+    icon: '🏪', dist: '0m — You are here',
+    deal: 'This is your usual store. No active discounts at this time. SpendWise found 3 cheaper alternatives nearby.',
+    savingLabel: 'Current'
+  },
+  {
+    id: 1, name: 'Cargills FoodCity', cat: 'GROCERIES · 380m AWAY',
+    price: 'LKR 3,360', saving: 'Save LKR 840',
+    color: 'var(--green)', borderColor: 'rgba(0,232,122,0.3)',
+    iconBg: 'rgba(0,232,122,0.08)', iconBorder: 'rgba(0,232,122,0.25)',
+    icon: '🛒', dist: '380m · ~5 min walk',
+    deal: '25% off fresh produce this week. Your usual grocery basket is estimated at LKR 3,360 here vs LKR 4,200 at Keells — a LKR 840 saving on this trip alone.',
+    savingLabel: 'Save LKR 840'
+  },
+  {
+    id: 2, name: 'Lanka Sathosa', cat: 'GROCERIES · 550m AWAY',
+    price: 'LKR 3,100', saving: 'Save LKR 1,100',
+    color: 'var(--green)', borderColor: 'rgba(0,232,122,0.3)',
+    iconBg: 'rgba(0,232,122,0.08)', iconBorder: 'rgba(0,232,122,0.25)',
+    icon: '🏬', dist: '550m · ~7 min walk',
+    deal: 'Government-backed retail pricing — consistently lower than private supermarkets. Your basket here is estimated at LKR 3,100. Best saving available within 600m today.',
+    savingLabel: 'Save LKR 1,100'
+  },
+  {
+    id: 3, name: 'Arpico Supermarket', cat: 'GROCERIES · 420m AWAY',
+    price: 'LKR 4,050', saving: 'Save LKR 150',
+    color: 'var(--gold)', borderColor: 'rgba(255,203,71,0.3)',
+    iconBg: 'rgba(255,203,71,0.08)', iconBorder: 'rgba(255,203,71,0.25)',
+    icon: '🏢', dist: '420m · ~6 min walk',
+    deal: 'Loyalty card holders get 5% off on all grocery items — applies to your account. Without loyalty card, prices are similar to Keells. Minor saving this trip.',
+    savingLabel: 'Save LKR 150'
+  }
+];
+
+let activeStore = null;
+
+function buildStoreRow(s, idx) {
+  return `<div class="store-row" id="row-${idx}" onclick="selectStore(${idx})">
+    <div class="sr-icon" style="background:${s.iconBg};border-color:${s.iconBorder};">${s.icon}</div>
+    <div class="sr-body">
+      <div class="sr-name">${s.name}</div>
+      <div class="sr-dist">${s.dist}</div>
+    </div>
+    <div class="sr-saving" style="color:${s.color};">${s.savingLabel}</div>
+    <div class="sr-arrow">→</div>
+  </div>`;
+}
+
+// Build store list
+const listEl = document.getElementById('store-list');
+stores.forEach((s, i) => { listEl.innerHTML += buildStoreRow(s, i); });
+
+function selectStore(idx) {
+  const s = stores[idx];
+
+  // Reset pins & rows
+  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
+  document.querySelectorAll('.store-row').forEach(r => r.classList.remove('selected'));
+
+  document.getElementById(`pin-${idx}`).classList.add('active-pin');
+  document.getElementById(`row-${idx}`).classList.add('selected');
+
+  // Update detail panel
+  const detail = document.getElementById('store-detail');
+  detail.style.borderColor = s.borderColor;
+  document.getElementById('sd-name').textContent = s.name;
+  document.getElementById('sd-cat').textContent = s.cat;
+  document.getElementById('sd-price').textContent = s.price;
+  document.getElementById('sd-price').style.color = s.color;
+  document.getElementById('sd-deal').textContent = s.deal;
+
+  detail.classList.add('visible');
+  detail.style.display = 'block';
+
+  // Scroll detail into view on mobile
+  if (window.innerWidth < 960) {
+    setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  }
+
+  activeStore = idx;
+}
+
+function closeDetail() {
+  document.getElementById('store-detail').style.display = 'none';
+  document.querySelectorAll('.map-pin').forEach(p => p.classList.remove('active-pin'));
+  document.querySelectorAll('.store-row').forEach(r => r.classList.remove('selected'));
+  activeStore = null;
+}
+
+// Auto-select Cargills on load
+setTimeout(() => selectStore(1), 600);
+</script>
+</body>
+</html>

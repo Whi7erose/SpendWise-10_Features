@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise  Feature 03: Bank SMS Auto-Parsing Feed | CW2 Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* ─── AMBIENT BG ─── */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(26,140,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,140,255,0.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);}
+.bg-glow{position:fixed;top:-15%;left:50%;transform:translateX(-50%);width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(26,140,255,0.08) 0%,rgba(0,232,122,0.04) 45%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb{position:fixed;bottom:5%;right:-8%;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(0,232,122,0.05),transparent 70%);pointer-events:none;z-index:0;}
+
+/* ─── NAV ─── */
+.proto-nav{display:flex;align-items:center;justify-content:space-between;padding:13px 40px;background:rgba(5,14,31,0.85);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.nav-left{display:flex;align-items:center;gap:16px;}
+.proto-logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.proto-logo span{color:var(--green);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 10px;border-radius:8px;color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;letter-spacing:0.3px;}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(26,140,255,0.12);color:var(--blue);border-color:rgba(26,140,255,0.25);}
+.proto-badge{font-family:var(--mono);font-size:10px;background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:4px 12px;border-radius:100px;font-weight:500;letter-spacing:0.5px;}
+
+/* ─── PAGE WRAP ─── */
+.page-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 40px 100px;}
+
+/* ─── HERO ─── */
+.page-hero{margin-bottom:56px;}
+.page-tag{display:inline-flex;align-items:center;gap:9px;background:rgba(26,140,255,0.08);border:1px solid rgba(26,140,255,0.22);color:var(--blue);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);animation:blink 2.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+
+.page-h1{font-size:clamp(38px,5.5vw,62px);font-weight:800;color:#fff;line-height:1.07;letter-spacing:-2.5px;margin-bottom:18px;}
+.page-h1 em{font-style:normal;background:linear-gradient(135deg,var(--blue) 0%,#00d4f0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;font-weight:700;}
+
+/* ─── STAT CHIPS ─── */
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 0;}
+.stat-chip{background:rgba(11,26,49,0.8);border:1px solid var(--border2);border-radius:14px;padding:16px 22px;text-align:center;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s;}
+.stat-chip:hover{border-color:rgba(26,140,255,0.35);transform:translateY(-2px);}
+.stat-chip .num{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;background:linear-gradient(135deg,var(--blue),#00d4f0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-chip .lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+
+/* ─── SEC LABEL ─── */
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--text3);}
+
+/* ─── MAIN GRID ─── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+
+/* ─── FEED PANEL ─── */
+.feed-panel{background:rgba(11,26,49,0.85);border:1.5px solid var(--border2);border-radius:22px;overflow:hidden;backdrop-filter:blur(16px);box-shadow:0 24px 64px rgba(0,0,0,0.35);}
+.feed-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);}
+.feed-header-left{display:flex;align-items:center;gap:10px;}
+.feed-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 2s ease infinite;flex-shrink:0;}
+.feed-title{font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+.feed-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px;}
+.sim-btn{background:var(--green);color:var(--navy);border:none;border-radius:9px;padding:8px 16px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.sim-btn:hover{background:var(--green2);transform:translateY(-1px);}
+.sim-btn:active{transform:scale(0.97);}
+
+.sms-feed{display:flex;flex-direction:column;gap:0;max-height:460px;overflow-y:auto;padding:8px;}
+.sms-feed::-webkit-scrollbar{width:3px;}
+.sms-feed::-webkit-scrollbar-track{background:transparent;}
+.sms-feed::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px;}
+
+.tx-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:13px;
+  align-items:center;border-radius:13px;padding:13px 14px;
+  transition:all .2s;cursor:pointer;border:1px solid transparent;
+  margin-bottom:2px;
+}
+.tx-row:hover{background:rgba(255,255,255,0.03);border-color:var(--border2);}
+.tx-row.new{
+  animation:slideInDown .4s cubic-bezier(.34,1.4,.64,1) both;
+  border-color:rgba(0,232,122,0.2);background:rgba(0,232,122,0.03);
+}
+@keyframes slideInDown{from{opacity:0;transform:translateY(-14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.tx-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;border:1px solid;}
+.tx-main{min-width:0;}
+.tx-merchant{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;}
+.tx-meta{font-size:11px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:6px;font-family:var(--mono);}
+.tx-cat{font-size:9.5px;font-weight:500;padding:2px 8px;border-radius:6px;border:1px solid;letter-spacing:0.2px;}
+.tx-amount{text-align:right;flex-shrink:0;}
+.tx-lkr{font-size:13px;font-weight:800;color:var(--red);font-family:var(--mono);letter-spacing:-0.3px;}
+.tx-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* ─── NLP PANEL ─── */
+.nlp-section{margin-top:24px;padding:0 8px 16px;}
+.nlp-divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.5px;}
+.nlp-divider::before,.nlp-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.sms-raw{
+  background:rgba(5,14,31,0.8);border:1px solid var(--border2);
+  border-radius:12px;padding:14px 16px;
+  font-family:var(--mono);font-size:11.5px;color:var(--text2);
+  line-height:1.7;position:relative;
+}
+.sms-raw .bank-label{font-size:9.5px;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.parsed-highlight{color:var(--green);font-weight:500;}
+
+.parse-arrow{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;margin:10px 0;
+  font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.5px;
+}
+.parse-arrow-line{flex:1;height:1px;background:var(--border);}
+.parse-arrow-badge{background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.18);color:var(--green);padding:3px 10px;border-radius:100px;font-size:10px;white-space:nowrap;}
+
+.nlp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.nlp-tag{font-family:var(--mono);font-size:10px;font-weight:500;padding:4px 10px;border-radius:8px;border:1px solid;letter-spacing:0.2px;}
+.nlp-tag.merchant{background:rgba(26,140,255,0.08);color:var(--blue);border-color:rgba(26,140,255,0.2);}
+.nlp-tag.amount{background:rgba(255,77,109,0.08);color:var(--red);border-color:rgba(255,77,109,0.2);}
+.nlp-tag.category{background:rgba(0,232,122,0.08);color:var(--green);border-color:rgba(0,232,122,0.2);}
+.nlp-tag.bank{background:rgba(255,203,71,0.08);color:var(--gold);border-color:rgba(255,203,71,0.2);}
+.nlp-tag.time{background:rgba(168,85,247,0.08);color:var(--purple);border-color:rgba(168,85,247,0.2);}
+
+/* ─── RIGHT COLUMN ─── */
+.right-col{}
+
+/* ─── STEP FLOW ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.step-item-row{display:flex;gap:18px;align-items:flex-start;position:relative;}
+.step-item-row:not(:last-child)::after{content:'';position:absolute;left:18px;top:42px;width:2px;height:calc(100% + 4px);background:linear-gradient(to bottom,rgba(26,140,255,0.25),rgba(26,140,255,0.04));}
+.step-num-circle{width:38px;height:38px;border-radius:50%;background:rgba(26,140,255,0.08);border:1.5px solid rgba(26,140,255,0.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--blue);flex-shrink:0;transition:all .2s;}
+.step-item-row:hover .step-num-circle{background:rgba(26,140,255,0.15);border-color:rgba(26,140,255,0.5);}
+.step-body{padding-bottom:26px;flex:1;}
+.step-body h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:5px;letter-spacing:-0.3px;}
+.step-body p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+.step-final .step-num-circle{background:rgba(0,232,122,0.1);border-color:rgba(0,232,122,0.35);color:var(--green);}
+
+/* ─── BANKS GRID ─── */
+.banks-section{margin-top:28px;}
+.bank-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px;}
+.bank-pill{background:rgba(11,26,49,0.8);border:1px solid var(--border);border-radius:9px;padding:8px 6px;text-align:center;font-family:var(--mono);font-size:10px;font-weight:500;color:var(--text3);transition:all .2s;letter-spacing:0.2px;}
+.bank-pill:hover{border-color:var(--border2);color:var(--text);background:rgba(255,255,255,0.04);}
+
+/* ─── INFO CARDS ─── */
+.info-card{background:rgba(11,26,49,0.8);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(10px);transition:all .25s;margin-top:14px;}
+.info-card:hover{border-color:rgba(26,140,255,0.2);transform:translateY(-2px);}
+.limit-box{background:rgba(255,203,71,0.04);border:1px solid rgba(255,203,71,0.18);border-radius:14px;padding:18px 20px;margin-top:14px;}
+.limit-box h5{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;}
+.limit-box p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+
+/* ─── PROTO NOTICE ─── */
+.proto-notice{display:flex;align-items:flex-start;gap:14px;background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.16);border-radius:14px;padding:16px 20px;margin-top:48px;}
+.proto-notice p{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.proto-notice p strong{color:var(--blue);}
+
+/* ─── PAGE NAV ─── */
+.page-nav{display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+.page-nav a{font-family:var(--mono);font-size:12px;color:var(--green);text-decoration:none;font-weight:500;transition:opacity .2s;}
+.page-nav a:hover{opacity:0.7;}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .65s ease both;}
+.anim-up-2{animation:fadeUp .65s ease 0.1s both;}
+.anim-up-3{animation:fadeUp .65s ease 0.2s both;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .page-wrap{padding:40px 20px 80px;}
+  .proto-pages{display:none;}
+  .main-grid{grid-template-columns:1fr;}
+  .bank-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:500px){
+  .bank-grid{grid-template-columns:repeat(2,1fr);}
+  .stat-strip{gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb"></div>
+
+
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero anim-up">
+    
+    <h1 class="page-h1">Bank SMS<br><em>Auto-Parsing Feed</em></h1>
+    <p class="page-sub">
+      Every transaction SMS from every major Sri Lankan bank is parsed by SpendWise's NLP engine in <strong>under 3 seconds</strong>  extracted, categorised, and added to your live expense feed automatically. Zero manual input, ever.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">&lt;3s</div><div class="lbl">Parse per SMS</div></div>
+      <div class="stat-chip"><div class="num">10+</div><div class="lbl">Banks supported</div></div>
+      <div class="stat-chip"><div class="num">LKR 0</div><div class="lbl">Manual input needed</div></div>
+      <div class="stat-chip"><div class="num">12K+</div><div class="lbl">Merchants registered</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Feed + NLP demo -->
+    <div class="anim-up-2">
+
+      <!-- Feed panel -->
+      <div class="feed-panel">
+        <div class="feed-header">
+          <div class="feed-header-left">
+            <div class="feed-live-dot"></div>
+            <div>
+              <div class="feed-title">Live Expense Feed</div>
+              <div class="feed-sub">AUTO-PARSED FROM BANK SMS</div>
+            </div>
+          </div>
+          <button class="sim-btn" onclick="addTransaction()">
+            <span>＋</span> Simulate SMS
+          </button>
+        </div>
+
+        <div class="sms-feed" id="feed"></div>
+
+        <!-- NLP parse demo inside the panel -->
+        <div class="nlp-section">
+          <div class="sec-label" style="margin-bottom:12px;">NLP Engine  Raw SMS → Structured Data</div>
+
+          <!-- SMS Example 1 -->
+          <div class="sms-raw">
+            <span class="bank-label">Sampath Bank · Incoming SMS</span>
+            Your A/C No.**4521 has been <span class="parsed-highlight">debited</span> by <span class="parsed-highlight">LKR 2,840.00</span> on <span class="parsed-highlight">01/04/2026</span> at <span class="parsed-highlight">14:23</span> for purchase at <span class="parsed-highlight">KEELLS SUPER NUGEGODA</span>. Avail bal: LKR 45,210.00
+          </div>
+          <div class="parse-arrow">
+            <div class="parse-arrow-line"></div>
+            <div class="parse-arrow-badge">⚡ NLP extracted in &lt;3s</div>
+            <div class="parse-arrow-line"></div>
+          </div>
+          <div class="nlp-tags">
+            <span class="nlp-tag bank">Bank: Sampath</span>
+            <span class="nlp-tag merchant">Merchant: Keells Super</span>
+            <span class="nlp-tag amount">Amount: LKR 2,840</span>
+            <span class="nlp-tag category">Category: Groceries</span>
+            <span class="nlp-tag time">14:23 · 01 Apr 2026</span>
+          </div>
+
+          <div class="nlp-divider">Second example · different bank format</div>
+
+          <!-- SMS Example 2 -->
+          <div class="sms-raw">
+            <span class="bank-label">Commercial Bank · Incoming SMS</span>
+            Alert: Debit of <span class="parsed-highlight">Rs. 680</span> from Acct *7891 at <span class="parsed-highlight">BARISTA COFFEE LIBERTY</span> on <span class="parsed-highlight">01-Apr-2026 09:15</span>. Unrecognised? Call 011-2350000.
+          </div>
+          <div class="parse-arrow">
+            <div class="parse-arrow-line"></div>
+            <div class="parse-arrow-badge">⚡ Normalised across bank formats</div>
+            <div class="parse-arrow-line"></div>
+          </div>
+          <div class="nlp-tags">
+            <span class="nlp-tag bank">Bank: Commercial</span>
+            <span class="nlp-tag merchant">Merchant: Barista Coffee</span>
+            <span class="nlp-tag amount">Amount: LKR 680</span>
+            <span class="nlp-tag category">Category: Dining &amp; Cafe</span>
+            <span class="nlp-tag time">09:15 · 01 Apr 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: How it works + banks + traceability -->
+    <div class="right-col anim-up-3">
+
+      <div class="sec-label">How the Parsing Engine Works</div>
+      <div class="step-flow">
+        <div class="step-item-row">
+          <div class="step-num-circle">1</div>
+          <div class="step-body">
+            <h4>SMS Listener  On-Device</h4>
+            <p>Android SMS READ_SMS permission triggers on every incoming message. iOS uses email parsing (bank e-notifications). Raw SMS text is captured on-device before any processing begins.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">2</div>
+          <div class="step-body">
+            <h4>Bank Identification</h4>
+            <p>The sender ID ("SAMPATH", "COMBANK", "SEYLAN-BANK") is matched against a bank pattern library. Each bank has its own SMS template registered  the parser knows exactly which regex to apply.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">3</div>
+          <div class="step-body">
+            <h4>NLP Field Extraction</h4>
+            <p>Named Entity Recognition extracts: amount (regex + currency normalisation), merchant name (cleaned of store codes), date/time (normalised to ISO), and transaction type (debit/credit).</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">4</div>
+          <div class="step-body">
+            <h4>Category Classification</h4>
+            <p>Merchant name is matched against SpendWise's 12,000+ Sri Lankan merchant→category lookup. Unrecognised merchants go to an ML classifier trained on merchant name patterns.</p>
+          </div>
+        </div>
+        <div class="step-item-row step-final">
+          <div class="step-num-circle">5</div>
+          <div class="step-body" style="padding-bottom:0;">
+            <h4>Feed Entry + Budget Check</h4>
+            <p>Transaction posted to live feed. Budget comparison runs instantly  if a category goes over limit, a budget alert fires. If near a retail location, the pre-purchase alert pipeline (Feature 01) activates.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banks -->
+      <div class="banks-section">
+        <div class="sec-label">Supported Sri Lankan Banks</div>
+        <div class="bank-grid">
+          <div class="bank-pill">Sampath</div>
+          <div class="bank-pill">Commercial</div>
+          <div class="bank-pill">BOC</div>
+          <div class="bank-pill">HNB</div>
+          <div class="bank-pill">People's</div>
+          <div class="bank-pill">NSB</div>
+          <div class="bank-pill">NDB</div>
+          <div class="bank-pill">Seylan</div>
+          <div class="bank-pill">Citi LK</div>
+          <div class="bank-pill">HSBC LK</div>
+          <div class="bank-pill">FriMi</div>
+          <div class="bank-pill">eZ Cash</div>
+        </div>
+      </div>
+
+      <!-- Traceability -->
+      <div class="info-card">
+        <div class="sec-label">Traceability</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-top:4px;">Implements FR-01 (automatic parsing of bank SMS messages) and satisfies the NFR‑Performance requirement (≤ 3‑second parse time). This capability forms the core transaction ingestion flow, from SMS receipt through to dashboard entry. By eliminating manual input, it directly tackles the high dropout rate observed in budgeting applications, addressing the primary reason users abandon such tools.</p>
+      </div>
+
+      <!-- Limitation -->
+      <div class="limit-box">
+        <h5>⚠ Prototype Limitation</h5>
+        <p>The "Simulate SMS" button adds pre-built sample transactions to demonstrate the feed UI. In production, real transactions arrive via Android SMS_RECEIVED broadcast receiver. The NLP engine and merchant category lookup require a trained model and database not included in this prototype.</p>
+      </div>
+
+    </div>
+  </div><!-- /main-grid -->
+
+  <!-- PROTO NOTICE -->
+  <div class="proto-notice">
+    <span style="font-size:15px;flex-shrink:0;">ℹ️</span>
+    <p><strong>Prototype Note:</strong> The live feed and Simulate SMS button demonstrate the UI design and transaction data structure. In production, SMS parsing requires Android READ_SMS permission, a bank-specific NLP model, and a cloud function pipeline. The feed layout, category badges, and NLP tag visualisation shown here represent the complete intended user experience.</p>
+  </div>
+
+ <div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="dashboards.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">← Page 02: Persona Dashboard</a>
+    <a href="savings-map.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">Page 04: Savings Map →</a>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+const categories = {
+  'Groceries':      { icon:'🛒', bg:'rgba(0,232,122,0.1)',  tc:'#00e87a', border:'rgba(0,232,122,0.25)' },
+  'Dining & Cafe':  { icon:'☕', bg:'rgba(255,203,71,0.1)', tc:'#ffcb47', border:'rgba(255,203,71,0.25)' },
+  'Fuel':           { icon:'⛽', bg:'rgba(26,140,255,0.1)', tc:'#1a8cff', border:'rgba(26,140,255,0.25)' },
+  'Transport':      { icon:'🚌', bg:'rgba(168,85,247,0.1)', tc:'#a855f7', border:'rgba(168,85,247,0.25)' },
+  'Shopping':       { icon:'🛍️', bg:'rgba(255,77,109,0.1)', tc:'#ff4d6d', border:'rgba(255,77,109,0.25)' },
+  'Health':         { icon:'💊', bg:'rgba(0,232,122,0.08)', tc:'#00e87a', border:'rgba(0,232,122,0.2)'  },
+};
+
+const transactions = [
+  { merchant:'Keells Super Nugegoda',   bank:'Sampath Bank',    amount:'2,840', cat:'Groceries',     time:'14:23' },
+  { merchant:'Barista Coffee Liberty',  bank:'Commercial Bank', amount:'680',   cat:'Dining & Cafe',  time:'09:15' },
+  { merchant:'Lanka IOC Filling Stn.',  bank:'HNB',             amount:'4,500', cat:'Fuel',           time:'08:02' },
+  { merchant:'PickMe Ride',             bank:'BOC',             amount:'350',   cat:'Transport',      time:'11:47' },
+  { merchant:'Cool Planet Colombo 3',   bank:'Sampath Bank',    amount:'12,400',cat:'Shopping',       time:'16:30' },
+  { merchant:'Arpico Supermarket',      bank:"People's Bank",   amount:'3,150', cat:'Groceries',      time:'10:05' },
+  { merchant:'Cargills FoodCity Kandy', bank:'NSB',             amount:'1,890', cat:'Groceries',      time:'07:30' },
+  { merchant:'Nawaloka Pharmacy',       bank:'Seylan Bank',     amount:'2,240', cat:'Health',         time:'13:15' },
+];
+
+let txIdx = 0;
+
+function buildRow(tx, isNew = false) {
+  const cat = categories[tx.cat] || { icon:'💳', bg:'rgba(255,255,255,0.05)', tc:'#8ca5c8', border:'rgba(255,255,255,0.1)' };
+  return `<div class="tx-row${isNew ? ' new' : ''}">
+    <div class="tx-icon" style="background:${cat.bg};border-color:${cat.border};">${cat.icon}</div>
+    <div class="tx-main">
+      <div class="tx-merchant">${tx.merchant}</div>
+      <div class="tx-meta">
+        ${tx.bank}
+        <span class="tx-cat" style="background:${cat.bg};color:${cat.tc};border-color:${cat.border};">${tx.cat}</span>
+      </div>
+    </div>
+    <div class="tx-amount">
+      <div class="tx-lkr">− LKR ${tx.amount}</div>
+      <div class="tx-time">${tx.time} today</div>
+    </div>
+  </div>`;
+}
+
+const feed = document.getElementById('feed');
+for (let i = 0; i < 4; i++) { feed.innerHTML += buildRow(transactions[i]); }
+txIdx = 4;
+
+function addTransaction() {
+  if (txIdx >= transactions.length) txIdx = 0;
+  const tx = transactions[txIdx++];
+  feed.insertAdjacentHTML('afterbegin', buildRow(tx, true));
+  const rows = feed.querySelectorAll('.tx-row');
+  if (rows.length > 8) rows[rows.length - 1].remove();
+}
+</script>
+</body>
+</html>

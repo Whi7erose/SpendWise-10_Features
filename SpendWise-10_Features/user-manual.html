@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise  User Manual</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#16a34a;--green-light:#dcfce7;--green-dark:#14532d;
+  --blue:#1d4ed8;--blue-light:#dbeafe;--blue-dark:#1e3a8a;
+  --amber:#b45309;--amber-light:#fef3c7;--amber-dark:#78350f;
+  --purple:#7c3aed;--purple-light:#ede9fe;--purple-dark:#4c1d95;
+  --gray:#374151;--gray-light:#f9fafb;--gray-mid:#e5e7eb;--gray-text:#6b7280;
+  --red:#dc2626;--red-light:#fee2e2;
+  --white:#ffffff;--navy:#0f172a;
+  --font:'Segoe UI',system-ui,sans-serif;
+  --mono:'Courier New',monospace;
+}
+body{font-family:var(--font);color:#111827;background:#f8fafc;line-height:1.6;font-size:15px}
+
+/* NAV */
+.nav{background:var(--navy);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-logo{color:#fff;font-size:20px;font-weight:700;letter-spacing:-0.5px}
+.nav-logo span{color:#4ade80}
+.nav-links{display:flex;gap:24px}
+.nav-links a{color:#94a3b8;text-decoration:none;font-size:13px;font-weight:500}
+.nav-links a:hover{color:#fff}
+
+/* HERO */
+.hero{background:var(--navy);padding:80px 40px 100px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 100%,rgba(74,222,128,0.08),transparent)}
+.hero-badge{display:inline-block;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:#4ade80;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px}
+.hero h1{font-size:clamp(42px,6vw,72px);font-weight:800;color:#fff;letter-spacing:-2px;line-height:1.05;margin-bottom:16px}
+.hero h1 span{color:#4ade80}
+.hero p{font-size:18px;color:#94a3b8;max-width:520px;margin:0 auto 48px;line-height:1.7}
+.hero-url{display:inline-block;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:#cbd5e1;font-family:var(--mono);font-size:13px;padding:10px 24px;border-radius:10px}
+
+/* SEGMENT CARDS */
+.segments-wrap{max-width:1100px;margin:-56px auto 0;padding:0 24px;position:relative;z-index:10}
+.segments{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.seg{background:#fff;border-radius:20px;padding:32px 28px;border:2px solid transparent;cursor:pointer;transition:all .2s;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+.seg:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.12)}
+.seg.personal{border-color:#16a34a}
+.seg.sme{border-color:#1d4ed8}
+.seg.corp{border-color:#7c3aed}
+.seg-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:26px}
+.seg.personal .seg-icon{background:#dcfce7}
+.seg.sme .seg-icon{background:#dbeafe}
+.seg.corp .seg-icon{background:#ede9fe}
+.seg h3{font-size:20px;font-weight:700;margin-bottom:8px}
+.seg.personal h3{color:#14532d}
+.seg.sme h3{color:#1e3a8a}
+.seg.corp h3{color:#4c1d95}
+.seg p{font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:16px}
+.seg-features{display:flex;flex-direction:column;gap:6px}
+.seg-feat{font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;display:flex;align-items:center;gap:6px}
+.seg.personal .seg-feat{background:#dcfce7;color:#14532d}
+.seg.sme .seg-feat{background:#dbeafe;color:#1e3a8a}
+.seg.corp .seg-feat{background:#ede9fe;color:#4c1d95}
+.seg-feat::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* SECTION WRAPPERS */
+.section{max-width:1100px;margin:0 auto;padding:80px 24px}
+.section-header{text-align:center;margin-bottom:60px}
+.section-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:14px}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-green{background:#dcfce7;color:#14532d}
+.badge-blue{background:#dbeafe;color:#1e3a8a}
+.badge-purple{background:#ede9fe;color:#4c1d95}
+.section-header h2{font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-1.5px;margin-bottom:12px;color:#0f172a}
+.section-header p{font-size:17px;color:#64748b;max-width:560px;margin:0 auto}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--gray-mid);max-width:1100px;margin:0 auto}
+
+/* ── PHONE MOCKUP ─────────────────────────────────────────────────── */
+.phone{width:240px;background:#0f172a;border-radius:36px;padding:8px;box-shadow:0 24px 64px rgba(0,0,0,0.25);flex-shrink:0}
+.phone-inner{background:#fff;border-radius:30px;overflow:hidden;min-height:440px}
+.phone-status{background:#0f172a;display:flex;justify-content:space-between;padding:8px 20px 4px;font-size:10px;color:#fff}
+.phone-notch{width:80px;height:20px;background:#0f172a;border-radius:0 0 14px 14px;margin:0 auto;margin-top:-4px}
+
+/* SCREEN COMPONENTS */
+.screen-nav{background:#16a34a;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.screen-nav-logo{color:#fff;font-size:14px;font-weight:800}
+.screen-nav-logo span{color:#bbf7d0}
+.screen-topbar{padding:16px 14px 10px;border-bottom:1px solid #f1f5f9}
+.screen-topbar-title{font-size:15px;font-weight:700;color:#111}
+.screen-topbar-sub{font-size:10px;color:#94a3b8;margin-top:2px}
+.screen-body{padding:12px 14px}
+.screen-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f8fafc}
+.screen-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.screen-label{font-size:11px;font-weight:700;color:#111;margin-bottom:1px}
+.screen-sub{font-size:9px;color:#94a3b8}
+.screen-amount{font-size:12px;font-weight:800;margin-left:auto;font-family:var(--mono)}
+.amount-red{color:#dc2626}
+.amount-green{color:#16a34a}
+.screen-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto}
+.badge-paid{background:#dcfce7;color:#14532d}
+.badge-pending{background:#fef3c7;color:#78350f}
+.badge-alert{background:#fee2e2;color:#991b1b}
+.screen-card{background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px}
+.screen-card-title{font-size:10px;font-weight:700;color:#374151;margin-bottom:6px}
+.screen-stat-row{display:flex;justify-content:space-between;font-size:9px;color:#6b7280;margin-top:4px}
+.screen-big-num{font-size:22px;font-weight:800;color:#0f172a;font-family:var(--mono)}
+.screen-green-num{color:#16a34a}
+.bar-track{height:6px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:6px}
+.bar-fill{height:100%;border-radius:4px}
+
+/* ALERT CARD */
+.alert-card{background:#fff;border-radius:16px;padding:12px;margin:10px 14px;box-shadow:0 2px 16px rgba(0,0,0,0.1);border:1.5px solid #16a34a}
+.alert-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.alert-app{font-size:10px;font-weight:800;color:#111;text-transform:uppercase;letter-spacing:0.5px}
+.alert-time{font-size:9px;color:#94a3b8;margin-left:auto}
+.alert-title{font-size:12px;font-weight:800;color:#111;margin-bottom:4px}
+.alert-body{font-size:9.5px;color:#4b5563;line-height:1.45}
+.alert-save{display:inline-block;background:#16a34a;color:#fff;font-size:9px;font-weight:800;padding:4px 10px;border-radius:8px;margin-top:6px}
+.alert-btns{display:flex;gap:6px;margin-top:8px}
+.alert-btn{flex:1;padding:8px;border-radius:9px;font-size:9px;font-weight:800;text-align:center;border:none}
+.alert-btn.yes{background:#16a34a;color:#fff}
+.alert-btn.no{background:#f1f5f9;color:#374151}
+
+/* VOICE SCREEN */
+.voice-center{display:flex;flex-direction:column;align-items:center;padding:20px 14px}
+.mic-btn{width:72px;height:72px;border-radius:50%;background:#7c3aed;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;position:relative}
+.mic-btn::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:1.5px solid rgba(124,58,237,0.3)}
+.mic-btn::after{content:'';position:absolute;inset:-16px;border-radius:50%;border:1px solid rgba(124,58,237,0.15)}
+.mic-icon{font-size:28px}
+.voice-status{font-size:10px;color:#7c3aed;font-weight:700;margin-bottom:10px}
+.transcript-box{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:8px 10px;font-size:10px;color:#374151;font-style:italic;width:100%;margin-bottom:10px;min-height:40px}
+.parsed-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:9px}
+.parsed-key{color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+.parsed-val{font-weight:700;color:#111}
+
+/* RECEIPT */
+.receipt{background:#fff;border-radius:10px;padding:12px;margin:8px 14px;font-family:var(--mono);font-size:9px;color:#111;border:1px dashed #d1d5db}
+.receipt-store{font-weight:900;text-align:center;font-size:11px;margin-bottom:4px}
+.receipt-sub{text-align:center;color:#6b7280;font-size:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed #d1d5db}
+.receipt-line{display:flex;justify-content:space-between;padding:2px 0}
+.receipt-total{display:flex;justify-content:space-between;font-weight:900;font-size:11px;border-top:1.5px solid #111;margin-top:6px;padding-top:6px}
+.receipt-hl{background:#bbf7d0;border-radius:2px;padding:1px 3px}
+
+/* SCAN OVERLAY */
+.scan-frame{position:relative}
+.scan-line{height:2px;background:#16a34a;margin:0 14px;border-radius:2px;box-shadow:0 0 6px rgba(22,163,74,0.5)}
+.scan-corners{position:absolute;inset:0;pointer-events:none}
+
+/* B2B SCREEN */
+.b2b-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 14px 10px}
+.b2b-kpi{background:#f8fafc;border-radius:10px;padding:8px 10px}
+.b2b-kpi-label{font-size:8px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.b2b-kpi-val{font-size:16px;font-weight:800;color:#0f172a;font-family:var(--mono);line-height:1}
+.b2b-kpi-change{font-size:8px;margin-top:2px;font-weight:600}
+.change-up{color:#16a34a}
+.change-down{color:#dc2626}
+
+/* SUB LIST */
+.sub-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f8fafc}
+.sub-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sub-name{font-size:10px;font-weight:700;color:#111}
+.sub-detail{font-size:8px;color:#94a3b8}
+.sub-badge{font-size:8px;font-weight:700;padding:2px 7px;border-radius:100px;margin-left:auto;white-space:nowrap}
+.sub-waste{background:#fee2e2;color:#991b1b}
+.sub-ok{background:#dcfce7;color:#14532d}
+.sub-warn{background:#fef3c7;color:#78350f}
+
+/* LAYOUT HELPERS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.two-col.reverse{direction:rtl}
+.two-col.reverse>*{direction:ltr}
+.phones-row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+
+/* STEP FLOW */
+.steps{display:flex;flex-direction:column;gap:0}
+.step-item{display:flex;gap:20px;align-items:flex-start;position:relative;padding-bottom:32px}
+.step-item:not(:last-child)::after{content:'';position:absolute;left:19px;top:42px;width:2px;height:calc(100% - 12px);background:#e5e7eb}
+.step-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;border:2px solid}
+.step-num.green{background:#dcfce7;color:#14532d;border-color:#16a34a}
+.step-num.blue{background:#dbeafe;color:#1e3a8a;border-color:#1d4ed8}
+.step-num.purple{background:#ede9fe;color:#4c1d95;border-color:#7c3aed}
+.step-body{flex:1;padding-top:8px}
+.step-body h4{font-size:16px;font-weight:700;margin-bottom:5px;color:#0f172a}
+.step-body p{font-size:14px;color:#4b5563;line-height:1.6}
+.step-body .btn-note{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border-radius:8px;padding:4px 10px;font-size:12px;color:#374151;font-weight:600;margin-top:8px}
+
+/* SEGMENT SECTION HEADERS */
+.seg-section{padding:80px 0 0}
+.seg-title-bar{padding:28px 40px;margin:0 -24px;border-radius:0}
+.seg-title-bar.green{background:var(--green-light);border-top:4px solid #16a34a;border-bottom:4px solid #16a34a}
+.seg-title-bar.blue{background:var(--blue-light);border-top:4px solid #1d4ed8;border-bottom:4px solid #1d4ed8}
+.seg-title-bar.purple{background:var(--purple-light);border-top:4px solid #7c3aed;border-bottom:4px solid #7c3aed}
+.seg-title-bar .seg-tag{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.seg-title-bar.green .seg-tag{color:#14532d}
+.seg-title-bar.blue .seg-tag{color:#1e3a8a}
+.seg-title-bar.purple .seg-tag{color:#4c1d95}
+.seg-title-bar h2{font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.seg-title-bar.green h2{color:#14532d}
+.seg-title-bar.blue h2{color:#1e3a8a}
+.seg-title-bar.purple h2{color:#4c1d95}
+.seg-title-bar p{font-size:15px}
+.seg-title-bar.green p{color:#166534}
+.seg-title-bar.blue p{color:#1e40af}
+.seg-title-bar.purple p{color:#5b21b6}
+
+/* FEATURE BLOCK */
+.feat-block{display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;padding:56px 0;border-bottom:1px solid #f1f5f9}
+.feat-block.flip{grid-template-columns:auto 1fr}
+.feat-block.flip .feat-visual{order:-1}
+.feat-content h3{font-size:26px;font-weight:800;letter-spacing:-0.5px;margin-bottom:10px;color:#0f172a}
+.feat-content p{font-size:15px;color:#374151;line-height:1.7;margin-bottom:20px}
+.how-steps{display:flex;flex-direction:column;gap:10px}
+.how-step{display:flex;gap:12px;align-items:flex-start}
+.how-num{width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.how-num.g{background:#dcfce7;color:#14532d}
+.how-num.b{background:#dbeafe;color:#1e3a8a}
+.how-num.p{background:#ede9fe;color:#4c1d95}
+.how-step p{font-size:13px;color:#4b5563;line-height:1.55;margin:0}
+.how-step strong{color:#0f172a}
+
+/* GETTING STARTED FLOW */
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.flow-steps::before{content:'';position:absolute;top:36px;left:12%;right:12%;height:2px;background:#e5e7eb;z-index:0}
+.flow-step{text-align:center;position:relative;z-index:1}
+.flow-step-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;border:3px solid #fff;box-shadow:0 0 0 2px #e5e7eb}
+.flow-step-circle.s1{background:#dcfce7}
+.flow-step-circle.s2{background:#dbeafe}
+.flow-step-circle.s3{background:#fef3c7}
+.flow-step-circle.s4{background:#ede9fe}
+.flow-step h4{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:6px}
+.flow-step p{font-size:12px;color:#6b7280;line-height:1.5;max-width:160px;margin:0 auto}
+
+/* COMPARISON TABLE */
+.vs-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+.vs-table th{background:#0f172a;color:#fff;padding:10px 14px;text-align:left;font-size:12px;font-weight:700;letter-spacing:0.5px}
+.vs-table th:first-child{border-radius:10px 0 0 0}
+.vs-table th:last-child{border-radius:0 10px 0 0}
+.vs-table td{padding:10px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.vs-table tr:last-child td{border-bottom:none}
+.vs-table tr:nth-child(even) td{background:#f8fafc}
+.vs-table .check{color:#16a34a;font-weight:800}
+.vs-table .cross{color:#dc2626;font-weight:800}
+.vs-table .sw-col{color:#16a34a;font-weight:700}
+
+/* FOOTER */
+footer{background:var(--navy);color:#94a3b8;text-align:center;padding:40px;font-size:13px;margin-top:80px}
+footer strong{color:#fff}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .segments{grid-template-columns:1fr}
+  .two-col,.feat-block,.feat-block.flip{grid-template-columns:1fr}
+  .feat-block.flip .feat-visual{order:0}
+  .flow-steps{grid-template-columns:1fr 1fr;gap:24px}
+  .flow-steps::before{display:none}
+  .phones-row{flex-direction:column;align-items:center}
+  .nav-links{display:none}
+  .hero{padding:60px 20px 80px}
+  .section{padding:60px 20px}
+}
+
+/* LOGIN SCREEN */
+.login-form{padding:16px}
+.login-logo{text-align:center;margin-bottom:16px}
+.login-logo-text{font-size:20px;font-weight:800;color:#0f172a}
+.login-logo-text span{color:#16a34a}
+.login-sub{font-size:11px;color:#6b7280;text-align:center;margin-bottom:16px}
+.login-field{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:11px;color:#374151}
+.login-field-label{font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin-bottom:2px}
+.login-field-val{font-size:12px;color:#111;font-weight:600}
+.login-btn{background:#16a34a;color:#fff;padding:11px;border-radius:11px;text-align:center;font-size:12px;font-weight:800;margin-top:6px}
+.segment-choose{padding:14px}
+.seg-choose-title{font-size:11px;font-weight:700;color:#374151;margin-bottom:10px;text-align:center}
+.seg-opt{display:flex;align-items:center;gap:10px;padding:10px;border-radius:11px;margin-bottom:7px;border:1.5px solid}
+.seg-opt.g{background:#f0fdf4;border-color:#16a34a}
+.seg-opt.b{background:#eff6ff;border-color:#1d4ed8}
+.seg-opt.p{background:#faf5ff;border-color:#7c3aed}
+.seg-opt-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.seg-opt.g .seg-opt-icon{background:#dcfce7}
+.seg-opt.b .seg-opt-icon{background:#dbeafe}
+.seg-opt.p .seg-opt-icon{background:#ede9fe}
+.seg-opt-name{font-size:11px;font-weight:700}
+.seg-opt.g .seg-opt-name{color:#14532d}
+.seg-opt.b .seg-opt-name{color:#1e3a8a}
+.seg-opt.p .seg-opt-name{color:#4c1d95}
+.seg-opt-desc{font-size:9px;color:#6b7280;margin-top:1px}
+
+/* PAYMENT */
+.plan-card{background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:8px;border:1.5px solid #e5e7eb}
+.plan-card.active{background:#f0fdf4;border-color:#16a34a}
+.plan-name{font-size:12px;font-weight:800;color:#0f172a}
+.plan-price{font-size:18px;font-weight:800;color:#16a34a;font-family:var(--mono)}
+.plan-price span{font-size:10px;color:#6b7280;font-family:var(--font);font-weight:400}
+.plan-features{font-size:9px;color:#4b5563;margin-top:4px;line-height:1.7}
+</style>
+</head>
+<body>
+
+
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Official User Manual</div>
+  <h1>Welcome to<br><span>SpendWise</span></h1>
+  <p>Your proactive financial guardian  alerts you before you overspend, tracks everything automatically, and works for personal users, SMEs, and corporate teams.</p>
+  <div class="hero-url">(Local Project)</div>
+</div>
+
+<!-- 3 SEGMENT CARDS -->
+<div class="segments-wrap">
+  <div class="segments">
+    <div class="seg personal">
+      <div class="seg-icon">&#128100;</div>
+      <h3>Personal Users</h3>
+      <p>Students, families, and individuals managing everyday spending in Sri Lanka. Zero manual entry  SpendWise reads your bank SMS automatically.</p>
+      <div class="seg-features">
+        <div class="seg-feat">Real-time saving alerts</div>
+        <div class="seg-feat">AI persona dashboard</div>
+        <div class="seg-feat">Voice expense logging</div>
+        <div class="seg-feat">Savings map</div>
+        <div class="seg-feat">Subscription detector</div>
+      </div>
+    </div>
+    <div class="seg sme">
+      <div class="seg-icon">&#127970;</div>
+      <h3>SME Business</h3>
+      <p>Small and medium business owners who need professional expense reports and tax receipt management without expensive accounting software.</p>
+      <div class="seg-features">
+        <div class="seg-feat">OCR receipt scanner</div>
+        <div class="seg-feat">One-click IRD reports</div>
+        <div class="seg-feat">Auto expense categorisation</div>
+        <div class="seg-feat">VAT tracking</div>
+        <div class="seg-feat">Accountant export</div>
+      </div>
+    </div>
+    <div class="seg corp">
+      <div class="seg-icon">&#128188;</div>
+      <h3>Corporate Teams</h3>
+      <p>Employees using company cards and employers needing automated reimbursement claims and retail intelligence data for strategic decisions.</p>
+      <div class="seg-features">
+        <div class="seg-feat">Corporate card tracking</div>
+        <div class="seg-feat">Reimbursement claims</div>
+        <div class="seg-feat">HR system integration</div>
+        <div class="seg-feat">B2B retail intelligence</div>
+        <div class="seg-feat">PDPA-compliant analytics</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GETTING STARTED -->
+<div class="section" id="getting-started">
+  <div class="section-header">
+    <div class="section-badge badge-gray">Step 1</div>
+    <h2>Getting Started</h2>
+    <p>From download to your first saving alert in under 5 minutes</p>
+  </div>
+
+  <!-- FLOW DIAGRAM -->
+  <div class="flow-steps" style="margin-bottom:72px">
+    <div class="flow-step">
+      <div class="flow-step-circle s1">&#11015;</div>
+      <h4>Download</h4>
+      <p>Install SpendWise from Google Play or App Store  or open the web prototype</p>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-circle s2">&#128272;</div>
+      <h4>Create Account</h4>
+      <p>Sign up with your email, grant bank SMS permission</p>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-circle s3">&#127919;</div>
+      <h4>Choose Category</h4>
+      <p>Select Personal, SME, or Corporate  your dashboard customises instantly</p>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-circle s4">&#128176;</div>
+      <h4>Pick a Plan</h4>
+      <p>3-month free trial, then choose Free or Premium  LKR 1,500/month</p>
+    </div>
+  </div>
+
+  <!-- LOGIN + CATEGORY SCREENS -->
+  <div class="two-col">
+    <div>
+      <div class="steps">
+        <div class="step-item">
+          <div class="step-num green">1</div>
+          <div class="step-body">
+            <h4>Open the App and Sign Up</h4>
+            <p>Enter your email address and create a password. SpendWise never asks for your bank login details  it reads only the SMS notifications your bank sends you.</p>
+            <span class="btn-note">&#128274; Bank-safe  no credentials required</span>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num green">2</div>
+          <div class="step-body">
+            <h4>Grant SMS Permission</h4>
+            <p>When prompted, tap Allow SMS Access. This lets SpendWise read your bank transaction messages and build your expense feed automatically. You can revoke this at any time in phone settings.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num green">3</div>
+          <div class="step-body">
+            <h4>Choose Your Category</h4>
+            <p>Select Personal, SME Business, or Corporate. This sets your dashboard layout, which features appear in your menu, and which report types are available to you.</p>
+          </div>
+        </div>
+        <div class="step-item" style="padding-bottom:0">
+          <div class="step-num green">4</div>
+          <div class="step-body">
+            <h4>Select a Payment Plan</h4>
+            <p>Start with the free 3-month trial  all Premium features unlocked at no cost. After the trial, choose the Free tier (basic tracking only) or Premium (LKR 1,500/month) for all 10 features.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE MOCKUPS: Login + Category -->
+    <div class="phones-row">
+      <!-- Login phone -->
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="login-form">
+            <div class="login-logo"><div class="login-logo-text">Spend<span>Wise</span></div></div>
+            <div style="font-size:13px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:4px">Create your account</div>
+            <div class="login-sub">Free 3-month Premium trial</div>
+            <div class="login-field">
+              <div class="login-field-label">Email address</div>
+              <div class="login-field-val">ravindu@email.com</div>
+            </div>
+            <div class="login-field">
+              <div class="login-field-label">Password</div>
+              <div class="login-field-val">&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;</div>
+            </div>
+            <div class="login-btn">Create Account</div>
+            <div style="text-align:center;margin-top:12px;font-size:10px;color:#6b7280">Already have an account? <span style="color:#16a34a;font-weight:700">Sign in</span></div>
+            <div style="text-align:center;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9">
+              <div style="font-size:9px;color:#9ca3af;margin-bottom:8px">GRANT PERMISSION TO CONTINUE</div>
+              <div style="background:#f0fdf4;border:1px solid #16a34a;border-radius:10px;padding:8px 10px;font-size:9.5px;color:#14532d;font-weight:600">&#128241; Allow SMS Access &rarr;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category selection phone -->
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="segment-choose">
+            <div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:4px">Who are you using SpendWise as?</div>
+            <div style="font-size:10px;color:#6b7280;margin-bottom:14px">This sets your dashboard and features</div>
+            <div class="seg-opt g">
+              <div class="seg-opt-icon">&#128100;</div>
+              <div>
+                <div class="seg-opt-name">Personal</div>
+                <div class="seg-opt-desc">Everyday spending & savings</div>
+              </div>
+              <div style="margin-left:auto;width:16px;height:16px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff">&#10003;</div>
+            </div>
+            <div class="seg-opt b">
+              <div class="seg-opt-icon">&#127970;</div>
+              <div>
+                <div class="seg-opt-name">SME Business</div>
+                <div class="seg-opt-desc">Expense reports & receipts</div>
+              </div>
+            </div>
+            <div class="seg-opt p">
+              <div class="seg-opt-icon">&#128188;</div>
+              <div>
+                <div class="seg-opt-name">Corporate</div>
+                <div class="seg-opt-desc">Company card & claims</div>
+              </div>
+            </div>
+            <div style="margin-top:14px;font-size:12px;font-weight:700;color:#374151;margin-bottom:10px">Choose your plan</div>
+            <div class="plan-card">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="plan-name">Free Tier</div>
+                <div class="plan-price">LKR 0<span>/mo</span></div>
+              </div>
+              <div class="plan-features">Basic SMS tracking &bull; Dashboard &bull; 3 reports/month</div>
+            </div>
+            <div class="plan-card active">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="plan-name">Premium &#11088;</div>
+                <div class="plan-price">1,500<span>/mo</span></div>
+              </div>
+              <div class="plan-features">All 10 features &bull; Unlimited reports &bull; Voice &bull; OCR &bull; B2B &bull; Free 3 months trial</div>
+            </div>
+            <div style="background:#16a34a;color:#fff;padding:10px;border-radius:11px;text-align:center;font-size:11px;font-weight:800;margin-top:6px">Start Free Trial &rarr;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ════════════ PERSONAL SEGMENT ════════════ -->
+<div class="section" id="personal">
+  <div class="seg-title-bar green" style="border-radius:16px;margin:0 0 56px;padding:28px 36px">
+    <div class="seg-tag">&#128100; For Personal Users</div>
+    <h2>Personal Finance Features</h2>
+    <p>Zero-effort daily money management  SpendWise does everything automatically while you just live your life.</p>
+  </div>
+
+  <!-- Feature P1: SMS Feed -->
+  <div class="feat-block">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dcfce7;color:#14532d;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 01  Auto SMS Tracking</div>
+      <h3>Your Expense Feed Fills Itself</h3>
+      <p>SpendWise reads every bank SMS notification and automatically builds your expense log. No typing, no forms  your spending history appears the moment a transaction happens.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num g">1</div>
+          <p><strong>Open the Expense Feed tab.</strong> You will see a live list of all recent transactions, already sorted by date with merchant icons.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">2</div>
+          <p><strong>Read the coloured category badges</strong>  Groceries (green), Dining (yellow), Fuel (blue), Transport (purple), Shopping (red). These are applied automatically.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">3</div>
+          <p><strong>Tap any row</strong> to open the full transaction detail  merchant address, bank name, and which budget category was charged.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">4</div>
+          <p>On the prototype page, click <strong>+ Simulate SMS</strong> to watch a new transaction slide into the feed in real time.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="screen-nav"><div class="screen-nav-logo">Spend<span>Wise</span></div></div>
+          <div class="screen-topbar">
+            <div class="screen-topbar-title">Live Expense Feed</div>
+            <div class="screen-topbar-sub">AUTO-PARSED FROM BANK SMS</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#dcfce7">&#128722;</div>
+              <div><div class="screen-label">Keells Super</div><div class="screen-sub">Sampath Bank &bull; <span style="background:#dcfce7;color:#14532d;padding:1px 5px;border-radius:5px;font-size:8px;font-weight:700">Groceries</span></div></div>
+              <div class="screen-amount amount-red">&#8722; 2,840</div>
+            </div>
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#fef3c7">&#9749;</div>
+              <div><div class="screen-label">Barista Coffee</div><div class="screen-sub">Commercial Bank &bull; <span style="background:#fef3c7;color:#78350f;padding:1px 5px;border-radius:5px;font-size:8px;font-weight:700">Dining</span></div></div>
+              <div class="screen-amount amount-red">&#8722; 680</div>
+            </div>
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#dbeafe">&#9981;</div>
+              <div><div class="screen-label">Lanka IOC</div><div class="screen-sub">HNB &bull; <span style="background:#dbeafe;color:#1e3a8a;padding:1px 5px;border-radius:5px;font-size:8px;font-weight:700">Fuel</span></div></div>
+              <div class="screen-amount amount-red">&#8722; 4,500</div>
+            </div>
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#ede9fe">&#128661;</div>
+              <div><div class="screen-label">PickMe Ride</div><div class="screen-sub">BOC &bull; <span style="background:#ede9fe;color:#4c1d95;padding:1px 5px;border-radius:5px;font-size:8px;font-weight:700">Transport</span></div></div>
+              <div class="screen-amount amount-red">&#8722; 350</div>
+            </div>
+            <div style="background:#16a34a;color:#fff;padding:9px;border-radius:10px;text-align:center;font-size:10px;font-weight:800;margin-top:10px">+ Simulate SMS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature P2: Pre-Purchase Alert -->
+  <div class="feat-block flip">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dcfce7;color:#14532d;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 02  Pre-Purchase Alert</div>
+      <h3>Alerts Before You Spend</h3>
+      <p>When you walk near a supermarket, SpendWise checks if there is a cheaper store nearby and sends you a saving alert  before you tap your card.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num g">1</div>
+          <p><strong>Walk within 150m of a store</strong>  SpendWise detects this automatically using your phone's location service.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">2</div>
+          <p><strong>Receive the push notification</strong>  it shows you the cheaper nearby store and the exact LKR amount you will save on your usual basket.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">3</div>
+          <p><strong>Tap "Go to Cargills"</strong> to get walking directions to the cheaper store, or tap <strong>"Stay here"</strong> to dismiss. Both choices are remembered.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">4</div>
+          <p>The <strong>budget bar at the bottom</strong> shows how much of your monthly Groceries budget is already used  so you know exactly why the alert fired.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41 AM</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner" style="background:#f8fafc">
+          <div style="padding:10px 14px 6px;font-size:9px;color:#94a3b8;text-align:center">INCOMING NOTIFICATION</div>
+          <div class="alert-card">
+            <div class="alert-header">
+              <div style="width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,#16a34a,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:10px">&#128176;</div>
+              <div class="alert-app">SpendWise</div>
+              <div class="alert-time">just now</div>
+            </div>
+            <div class="alert-title">Save LKR 840 on groceries!</div>
+            <div class="alert-body">You're near Keells Nugegoda. Cargills FoodCity is 380m away with 25% off fresh produce  your usual basket is cheaper there today.</div>
+            <div class="alert-save">Estimated saving: LKR 840</div>
+            <div class="alert-btns">
+              <div class="alert-btn yes">Go to Cargills &rarr;</div>
+              <div class="alert-btn no">Stay here</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px;margin-top:4px">
+            <div style="background:#fee2e2;border:1px solid #fecaca;border-radius:11px;padding:10px 8px">
+              <div style="font-size:9px;font-weight:700;color:#991b1b">&#127978; Keells Nugegoda</div>
+              <div style="font-size:8px;color:#dc2626;margin-top:2px">YOU ARE HERE</div>
+              <div style="font-size:12px;font-weight:800;color:#dc2626;margin-top:4px;font-family:var(--mono)">LKR 4,200</div>
+            </div>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:11px;padding:10px 8px">
+              <div style="font-size:9px;font-weight:700;color:#14532d">&#128722; Cargills Food</div>
+              <div style="font-size:8px;color:#16a34a;margin-top:2px">380m away</div>
+              <div style="font-size:12px;font-weight:800;color:#16a34a;margin-top:4px;font-family:var(--mono)">LKR 3,360 &#10003;</div>
+            </div>
+          </div>
+          <div style="margin:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px">
+            <div style="font-size:8px;font-weight:700;color:#14532d;margin-bottom:5px">GROCERIES BUDGET  THIS MONTH</div>
+            <div class="bar-track"><div class="bar-fill" style="width:78%;background:#f59e0b"></div></div>
+            <div style="font-size:8px;color:#6b7280;margin-top:4px">LKR 7,800 used of LKR 10,000 &bull; 78% spent</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature P3: Persona Dashboard -->
+  <div class="feat-block">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dcfce7;color:#14532d;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 03  AI Dashboard</div>
+      <h3>Your Personalised Dashboard</h3>
+      <p>After 30 days, SpendWise classifies you into one of 5 spending personas and completely personalises your dashboard  different widgets, different insights, different layout  just for you.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num g">1</div>
+          <p><strong>Open the Dashboard tab.</strong> Your assigned persona is shown in the top-right badge (e.g., "Geolocation-Based Saver").</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">2</div>
+          <p>On the prototype, <strong>click the 5 persona cards</strong> at the top to preview each different dashboard layout.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">3</div>
+          <p><strong>Read your AI Insight card</strong>  a personalised tip based on your actual spending patterns (e.g., "You save most on weekday mornings at Cargills").</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">4</div>
+          <p>To <strong>change your persona</strong>, go to Settings &rarr; My Persona &rarr; Override.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div style="background:#0f172a;padding:10px 14px 8px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:11px;font-weight:800;color:#fff">Good morning, Ravindu &#128075;</div>
+              <div style="font-size:8px;color:#64748b">TUESDAY &bull; 1 APRIL 2026</div>
+            </div>
+            <div style="background:#dcfce7;color:#14532d;font-size:8px;font-weight:700;padding:3px 8px;border-radius:100px">&#128205; Geo Saver</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 6px">
+            <div class="screen-card">
+              <div class="screen-card-title">SAVED THIS MONTH</div>
+              <div class="screen-big-num screen-green-num">3,240</div>
+              <div style="font-size:8px;color:#6b7280;margin-top:2px">LKR &bull; 12 alerts acted on</div>
+            </div>
+            <div class="screen-card">
+              <div class="screen-card-title">NEAREST DEAL NOW</div>
+              <div style="font-size:12px;font-weight:800;color:#0f172a;margin-top:4px">Cargills 380m</div>
+              <div style="font-size:8px;color:#6b7280;margin-top:2px">25% off fresh produce</div>
+            </div>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;margin:0 14px 8px;padding:10px">
+            <div style="font-size:8px;font-weight:700;color:#16a34a;margin-bottom:5px">&#128161; AI INSIGHT</div>
+            <div style="font-size:10px;font-weight:700;color:#0f172a;margin-bottom:3px">You save most on weekday mornings</div>
+            <div style="font-size:9px;color:#4b5563;line-height:1.45">Cargills fresh markdowns happen before 10am Tue/Thu. A morning reminder could add LKR 600/month.</div>
+          </div>
+          <div style="padding:0 14px">
+            <div style="font-size:8px;font-weight:700;color:#9ca3af;margin-bottom:6px">DAILY SPEND  LAST 7 DAYS</div>
+            <div style="display:flex;align-items:flex-end;gap:4px;height:40px">
+              <div style="flex:1;background:#dcfce7;border-radius:3px 3px 0 0" title="Mon" data-h="65"></div>
+              <div style="flex:1;background:#dcfce7;border-radius:3px 3px 0 0" title="Tue" data-h="45"></div>
+              <div style="flex:1;background:#16a34a;border-radius:3px 3px 0 0" title="Wed" data-h="80"></div>
+              <div style="flex:1;background:#dcfce7;border-radius:3px 3px 0 0" title="Thu" data-h="55"></div>
+              <div style="flex:1;background:#16a34a;border-radius:3px 3px 0 0" title="Fri" data-h="90"></div>
+              <div style="flex:1;background:#dcfce7;border-radius:3px 3px 0 0" title="Sat" data-h="70"></div>
+              <div style="flex:1;background:#dcfce7;border-radius:3px 3px 0 0" title="Sun" data-h="40"></div>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:3px">
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">M</div>
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">T</div>
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">W</div>
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">T</div>
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">F</div>
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">S</div>
+              <div style="flex:1;font-size:7px;color:#94a3b8;text-align:center">S</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature P4: Voice Logger -->
+  <div class="feat-block flip">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dcfce7;color:#14532d;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 04  Voice Logger</div>
+      <h3>Log Cash Expenses by Speaking</h3>
+      <p>For cash purchases SpendWise can't read from SMS, just tap the mic and say what you spent. The AI extracts every field automatically.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num g">1</div>
+          <p><strong>Tap the microphone button</strong> on the home screen. The button pulses and shows "Listening…"</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">2</div>
+          <p><strong>Speak your expense</strong> in plain English: "Paid 480 rupees for coffee at Barista" or "350 for tuk from Nugegoda".</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">3</div>
+          <p><strong>Review the parsed card</strong>  SpendWise shows the Merchant, Amount, Category, and Time it extracted. Tap any field to correct it.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">4</div>
+          <p><strong>Tap "Add to Feed"</strong> to save. The entry joins your expense feed tagged with a mic icon.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div class="screen-nav"><div class="screen-nav-logo">&#127908; Voice Logger</div></div>
+          <div class="voice-center">
+            <div class="mic-btn"><div class="mic-icon">&#127908;</div></div>
+            <div class="voice-status">Listening… speak now</div>
+            <div class="transcript-box">"Paid 480 rupees for coffee at Barista"</div>
+            <div style="width:100%;background:#faf5ff;border:1.5px solid #7c3aed;border-radius:12px;padding:10px;margin-bottom:10px">
+              <div style="font-size:8px;font-weight:700;color:#7c3aed;margin-bottom:8px">&#10003; PARSED FIELDS  TAP TO EDIT</div>
+              <div class="parsed-row"><span class="parsed-key">Merchant</span><span class="parsed-val">Barista Coffee</span></div>
+              <div class="parsed-row"><span class="parsed-key">Amount</span><span class="parsed-val" style="color:#16a34a">LKR 480</span></div>
+              <div class="parsed-row"><span class="parsed-key">Category</span><span class="parsed-val">Dining &amp; Cafe</span></div>
+              <div class="parsed-row" style="border:none"><span class="parsed-key">Time</span><span class="parsed-val">Now &bull; 9:41 AM</span></div>
+            </div>
+            <div style="display:flex;gap:8px;width:100%">
+              <div style="flex:1;background:#16a34a;color:#fff;padding:9px;border-radius:10px;text-align:center;font-size:10px;font-weight:800">&#10003; Add to Feed</div>
+              <div style="background:#f1f5f9;color:#374151;padding:9px 14px;border-radius:10px;font-size:10px;font-weight:700">Cancel</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature P5: Subscription Detector -->
+  <div class="feat-block" style="border-bottom:none">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dcfce7;color:#14532d;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 05  Subscription Detector</div>
+      <h3>Find and Cancel Wasted Subscriptions</h3>
+      <p>SpendWise scans 90 days of bank SMS history to find every recurring payment. Services you haven't used in 30+ days are flagged in red.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num g">1</div>
+          <p><strong>Open Subscriptions</strong> from the menu. The red banner at the top shows your total detected monthly waste in LKR.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">2</div>
+          <p><strong>Red rows</strong> = unused for 30+ days. <strong>Gold rows</strong> = renewing within 3 days. <strong>No colour</strong> = actively used  keep these.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">3</div>
+          <p><strong>Tap "Cancel"</strong> on any red row. SpendWise opens the subscription management page of that service so you can cancel in one more tap.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num g">4</div>
+          <p><strong>Tap "Cancel All Waste"</strong> in the banner to bulk-cancel all flagged unused subscriptions at once.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:0;padding:12px 14px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:9px;font-weight:700;color:#dc2626;margin-bottom:2px">&#9888; WASTE DETECTED</div>
+              <div style="font-size:18px;font-weight:800;color:#0f172a;font-family:var(--mono)">LKR 3,840<span style="font-size:10px;font-weight:400;color:#6b7280;font-family:var(--font)">/mo</span></div>
+            </div>
+            <div style="background:#dc2626;color:#fff;font-size:9px;font-weight:800;padding:6px 10px;border-radius:8px">Cancel All</div>
+          </div>
+          <div class="screen-body">
+            <div class="sub-row">
+              <div class="sub-icon" style="background:#fee2e2">&#128250;</div>
+              <div><div class="sub-name">Netflix Premium</div><div class="sub-detail">Unused 47 days &bull; Next: 15 Apr</div></div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+                <span class="sub-badge sub-waste">Unused</span>
+                <span style="font-size:8px;font-weight:700;color:#dc2626;padding:2px 7px;border:1px solid #fecaca;border-radius:100px;cursor:pointer">Cancel</span>
+              </div>
+            </div>
+            <div class="sub-row">
+              <div class="sub-icon" style="background:#fee2e2">&#127925;</div>
+              <div><div class="sub-name">Spotify Premium</div><div class="sub-detail">Unused 32 days &bull; Next: 8 Apr</div></div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+                <span class="sub-badge sub-waste">Unused</span>
+                <span style="font-size:8px;font-weight:700;color:#dc2626;padding:2px 7px;border:1px solid #fecaca;border-radius:100px">Cancel</span>
+              </div>
+            </div>
+            <div class="sub-row">
+              <div class="sub-icon" style="background:#fef3c7">&#127947;</div>
+              <div><div class="sub-name">Gold's Gym</div><div class="sub-detail">Annual renewal in 3 days</div></div>
+              <div>
+                <span class="sub-badge sub-warn">3 days</span>
+              </div>
+            </div>
+            <div class="sub-row">
+              <div class="sub-icon" style="background:#dcfce7">&#128241;</div>
+              <div><div class="sub-name">SpendWise Premium</div><div class="sub-detail">Active &bull; Daily use</div></div>
+              <div><span class="sub-badge sub-ok">Active</span></div>
+            </div>
+            <div class="sub-row" style="border:none">
+              <div class="sub-icon" style="background:#dbeafe">&#128188;</div>
+              <div><div class="sub-name">Adobe Creative Cloud</div><div class="sub-detail">Active &bull; Used 2 days ago</div></div>
+              <div><span class="sub-badge sub-ok">Active</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ════════════ SME SEGMENT ════════════ -->
+<div class="section" id="sme">
+  <div class="seg-title-bar blue" style="border-radius:16px;margin:0 0 56px;padding:28px 36px">
+    <div class="seg-tag">&#127970; For SME Business Owners</div>
+    <h2>SME Business Features</h2>
+    <p>Professional expense management at LKR 1,500/month  everything a Sri Lankan SME needs without QuickBooks.</p>
+  </div>
+
+  <!-- Feature S1: OCR Scanner -->
+  <div class="feat-block">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 06  OCR Receipt Scanner</div>
+      <h3>Photograph Any Receipt  Data Appears Instantly</h3>
+      <p>Point your camera at any paper receipt. SpendWise reads the merchant name, date, line items, and VAT amount automatically  then stores it in your encrypted digital vault.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num b">1</div>
+          <p><strong>Tap "Scan Receipt"</strong> in the SME menu. Your camera opens  point it at any paper receipt or supplier invoice.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num b">2</div>
+          <p>A <strong>green scanning frame</strong> appears with corner brackets. Hold steady for 2–3 seconds until the scan-line passes the entire receipt.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num b">3</div>
+          <p><strong>Review the extracted data</strong>  merchant, date, total, and VAT amount appear in the result card. Tap any field to correct it.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num b">4</div>
+          <p>Tap <strong>"Add to Feed"</strong> to log the expense, or <strong>"Add to Claim"</strong> to attach it to a reimbursement report. The receipt image is stored in your encrypted vault.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner" style="background:#f8fafc">
+          <div style="background:#1d4ed8;padding:10px 14px;"><div style="font-size:11px;font-weight:800;color:#fff">&#128247; Receipt Scanner</div></div>
+          <!-- Receipt with scan overlay -->
+          <div style="position:relative;margin:10px 14px">
+            <div class="receipt">
+              <div class="receipt-store">KEELLS SUPER</div>
+              <div class="receipt-sub">Nugegoda &bull; VAT Reg: 114-902-5431<br>01 Apr 2026 &bull; 14:23</div>
+              <div class="receipt-line"><span>Milk 1L x2</span><span>480.00</span></div>
+              <div class="receipt-line"><span>Bread Loaf</span><span>175.00</span></div>
+              <div class="receipt-line"><span>Vegetables</span><span>890.00</span></div>
+              <div class="receipt-line"><span>Chicken 500g</span><span>680.00</span></div>
+              <div class="receipt-line" style="margin-top:5px;padding-top:5px;border-top:1px dashed #d1d5db;color:#6b7280"><span>Sub-Total</span><span>2,565.00</span></div>
+              <div class="receipt-line"><span class="receipt-hl">VAT (18%)</span><span class="receipt-hl">275.00</span></div>
+              <div class="receipt-total"><span class="receipt-hl">TOTAL</span><span class="receipt-hl">LKR 2,840</span></div>
+            </div>
+            <!-- Scan overlay -->
+            <div style="position:absolute;inset:0;border:2px solid #16a34a;border-radius:10px;pointer-events:none">
+              <div style="position:absolute;top:4px;left:4px;width:14px;height:14px;border-top:2.5px solid #16a34a;border-left:2.5px solid #16a34a"></div>
+              <div style="position:absolute;top:4px;right:4px;width:14px;height:14px;border-top:2.5px solid #16a34a;border-right:2.5px solid #16a34a"></div>
+              <div style="position:absolute;bottom:4px;left:4px;width:14px;height:14px;border-bottom:2.5px solid #16a34a;border-left:2.5px solid #16a34a"></div>
+              <div style="position:absolute;bottom:4px;right:4px;width:14px;height:14px;border-bottom:2.5px solid #16a34a;border-right:2.5px solid #16a34a"></div>
+              <div style="position:absolute;top:60%;left:4px;right:4px;height:2px;background:#16a34a;box-shadow:0 0 6px rgba(22,163,74,0.8)"></div>
+            </div>
+          </div>
+          <!-- Result card -->
+          <div style="background:#f0fdf4;border:1.5px solid #16a34a;border-radius:12px;margin:6px 14px;padding:10px">
+            <div style="font-size:8px;font-weight:700;color:#16a34a;margin-bottom:8px">&#10003; OCR COMPLETE</div>
+            <div class="parsed-row"><span class="parsed-key">Merchant</span><span class="parsed-val">Keells Super</span></div>
+            <div class="parsed-row"><span class="parsed-key">Total</span><span class="parsed-val" style="color:#16a34a">LKR 2,840</span></div>
+            <div class="parsed-row"><span class="parsed-key">VAT</span><span class="parsed-val" style="color:#b45309">LKR 275</span></div>
+            <div class="parsed-row" style="border:none"><span class="parsed-key">Stored</span><span class="parsed-val" style="color:#16a34a">Encrypted &#128274;</span></div>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px 14px">
+            <div style="flex:1;background:#16a34a;color:#fff;padding:8px;border-radius:9px;text-align:center;font-size:9px;font-weight:800">Add to Feed</div>
+            <div style="flex:1;background:#ede9fe;color:#4c1d95;padding:8px;border-radius:9px;text-align:center;font-size:9px;font-weight:800">Add to Claim</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature S2: Expense Reports -->
+  <div class="feat-block flip" style="border-bottom:none">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 07  One-Click Reports</div>
+      <h3>Generate IRD-Formatted Reports in One Click</h3>
+      <p>Select a reporting period and categories  SpendWise instantly builds a professional expense report formatted for Sri Lanka's Inland Revenue Department.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num b">1</div>
+          <p><strong>Go to Reports</strong> in the SME menu. Enter your business name and select the reporting period (month, quarter, or financial year).</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num b">2</div>
+          <p><strong>Tick the expense categories</strong> you want to include: Groceries, Dining, Fuel, Accommodation, Software, Medical, or Training.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num b">3</div>
+          <p><strong>Tap "Generate Report".</strong> A professional itemised report appears instantly  showing all transactions, category totals, and VAT claimable amount.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num b">4</div>
+          <p>Tap <strong>"Download PDF"</strong> to save an IRD-formatted file, <strong>"Export CSV"</strong> to send to your accountant, or <strong>"Email Accountant"</strong> to send directly.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div style="background:#1d4ed8;padding:10px 14px;"><div style="font-size:11px;font-weight:800;color:#fff">&#128202; Expense Report</div></div>
+          <div class="screen-body">
+            <div style="font-size:9px;font-weight:700;color:#374151;margin-bottom:6px">BUSINESS DETAILS</div>
+            <div style="background:#f8fafc;border-radius:9px;padding:8px 10px;font-size:9.5px;color:#111;font-weight:600;margin-bottom:8px;border:1px solid #e5e7eb">Senajith Consulting (Pvt) Ltd</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+              <div style="background:#f8fafc;border-radius:9px;padding:7px;font-size:9px;border:1px solid #e5e7eb"><div style="color:#9ca3af;font-size:7px;font-weight:700;margin-bottom:2px">PERIOD</div>April 2026</div>
+              <div style="background:#f8fafc;border-radius:9px;padding:7px;font-size:9px;border:1px solid #e5e7eb"><div style="color:#9ca3af;font-size:7px;font-weight:700;margin-bottom:2px">TYPE</div>Itemised IRD</div>
+            </div>
+            <div style="font-size:9px;font-weight:700;color:#374151;margin-bottom:6px">CATEGORIES</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
+              <span style="background:#dbeafe;color:#1e3a8a;font-size:8px;font-weight:700;padding:3px 8px;border-radius:6px">Dining</span>
+              <span style="background:#dbeafe;color:#1e3a8a;font-size:8px;font-weight:700;padding:3px 8px;border-radius:6px">Fuel</span>
+              <span style="background:#dbeafe;color:#1e3a8a;font-size:8px;font-weight:700;padding:3px 8px;border-radius:6px">Accommodation</span>
+              <span style="background:#dbeafe;color:#1e3a8a;font-size:8px;font-weight:700;padding:3px 8px;border-radius:6px">Software</span>
+              <span style="background:#f1f5f9;color:#6b7280;font-size:8px;padding:3px 8px;border-radius:6px">Medical</span>
+            </div>
+            <div style="background:#1d4ed8;color:#fff;padding:9px;border-radius:10px;text-align:center;font-size:10px;font-weight:800;margin-bottom:10px">&#9889; Generate Report</div>
+            <!-- mini report preview -->
+            <div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden">
+              <div style="background:#0f172a;padding:8px 10px;display:flex;justify-content:space-between;align-items:center">
+                <div style="font-size:9px;font-weight:700;color:#fff">Senajith Consulting</div>
+                <div style="background:#dcfce7;color:#14532d;font-size:8px;font-weight:800;padding:2px 7px;border-radius:6px">LKR 47,340</div>
+              </div>
+              <div style="padding:6px 10px">
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:8px"><span style="color:#6b7280">Lanka IOC</span><span style="font-weight:700">4,500</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:8px"><span style="color:#6b7280">Cinnamon Grand</span><span style="font-weight:700">18,400</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:8px"><span style="color:#6b7280">FlyHub SaaS</span><span style="font-weight:700">3,200</span></div>
+              </div>
+              <div style="display:flex;gap:4px;padding:6px 8px;background:#f8fafc">
+                <div style="flex:1;background:#fee2e2;color:#991b1b;padding:5px;border-radius:6px;text-align:center;font-size:8px;font-weight:700">PDF</div>
+                <div style="flex:1;background:#dcfce7;color:#14532d;padding:5px;border-radius:6px;text-align:center;font-size:8px;font-weight:700">CSV</div>
+                <div style="flex:1;background:#f1f5f9;color:#374151;padding:5px;border-radius:6px;text-align:center;font-size:8px;font-weight:700">Email</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ════════════ CORPORATE SEGMENT ════════════ -->
+<div class="section" id="corporate">
+  <div class="seg-title-bar purple" style="border-radius:16px;margin:0 0 56px;padding:28px 36px">
+    <div class="seg-tag">&#128188; For Corporate Employees &amp; Teams</div>
+    <h2>Corporate Features</h2>
+    <p>Auto-track company card expenses, submit reimbursement claims in one click, and access retail intelligence for strategic decisions.</p>
+  </div>
+
+  <!-- Feature C1: Reimbursement -->
+  <div class="feat-block">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#ede9fe;color:#4c1d95;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 08  Reimbursement Tracker</div>
+      <h3>Submit Expense Claims Without Paperwork</h3>
+      <p>All your company card transactions are tracked automatically via bank SMS. Review them, mark what needs reimbursing, and generate an IRD-formatted claim PDF in one tap.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num p">1</div>
+          <p><strong>Open Corporate &rarr; Reimbursements.</strong> All company card transactions appear automatically, categorised by type (Fuel, Meals, Accommodation, Travel).</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num p">2</div>
+          <p>Check the <strong>status badge</strong> on each row: <span style="background:#dcfce7;color:#14532d;padding:2px 6px;border-radius:5px;font-size:11px;font-weight:700">Approved</span> <span style="background:#dbeafe;color:#1e3a8a;padding:2px 6px;border-radius:5px;font-size:11px;font-weight:700">Submitted</span> <span style="background:#fef3c7;color:#78350f;padding:2px 6px;border-radius:5px;font-size:11px;font-weight:700">Pending</span></p>
+        </div>
+        <div class="how-step">
+          <div class="how-num p">3</div>
+          <p><strong>Tap "Generate IRD Claim PDF"</strong>  a full reimbursement document is created instantly, including business purpose notes and VAT breakdown.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num p">4</div>
+          <p><strong>Tap "Submit to HR"</strong> to send the claim digitally to your Finance or HR team. No printing, no scanning, no email attachments needed.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div style="background:#4c1d95;padding:10px 14px;"><div style="font-size:11px;font-weight:800;color:#fff">&#128179; Reimbursements</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 14px">
+            <div style="background:#f0fdf4;border-radius:9px;padding:8px;text-align:center">
+              <div style="font-size:7px;font-weight:700;color:#16a34a;margin-bottom:2px">TOTAL</div>
+              <div style="font-size:13px;font-weight:800;color:#14532d;font-family:var(--mono)">84.2K</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:9px;padding:8px;text-align:center">
+              <div style="font-size:7px;font-weight:700;color:#9ca3af;margin-bottom:2px">PENDING</div>
+              <div style="font-size:13px;font-weight:800;color:#0f172a;font-family:var(--mono)">52.4K</div>
+            </div>
+            <div style="background:#f0fdf4;border-radius:9px;padding:8px;text-align:center">
+              <div style="font-size:7px;font-weight:700;color:#16a34a;margin-bottom:2px">APPROVED</div>
+              <div style="font-size:13px;font-weight:800;color:#14532d;font-family:var(--mono)">31.8K</div>
+            </div>
+          </div>
+          <div class="screen-body" style="padding-top:0">
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#dbeafe">&#9992;</div>
+              <div><div class="screen-label">SriLankan Airlines</div><div class="screen-sub">Business Travel &bull; SMS</div></div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:800;font-family:var(--mono);color:#0f172a">42,000</div>
+                <span class="screen-badge badge-paid">Approved</span>
+              </div>
+            </div>
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#fef3c7">&#127944;</div>
+              <div><div class="screen-label">Cinnamon Grand</div><div class="screen-sub">Accommodation &bull; SMS</div></div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:800;font-family:var(--mono);color:#0f172a">36,800</div>
+                <span class="screen-badge" style="background:#dbeafe;color:#1e3a8a">Submitted</span>
+              </div>
+            </div>
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#dcfce7">&#127869;</div>
+              <div><div class="screen-label">Hilton Colombo</div><div class="screen-sub">Meals &bull; Client Dinner</div></div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:800;font-family:var(--mono);color:#0f172a">8,400</div>
+                <span class="screen-badge badge-pending">Pending</span>
+              </div>
+            </div>
+            <div class="screen-row">
+              <div class="screen-icon" style="background:#fee2e2">&#9981;</div>
+              <div><div class="screen-label">Lanka IOC Fuel</div><div class="screen-sub">Fuel &bull; Company Vehicle</div></div>
+              <div style="text-align:right">
+                <div style="font-size:10px;font-weight:800;font-family:var(--mono);color:#0f172a">4,500</div>
+                <span class="screen-badge badge-pending">Pending</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:6px 14px">
+            <div style="flex:2;background:#4c1d95;color:#fff;padding:9px;border-radius:10px;text-align:center;font-size:9px;font-weight:800">Generate IRD Claim PDF</div>
+            <div style="flex:1;background:#ede9fe;color:#4c1d95;padding:9px;border-radius:10px;text-align:center;font-size:9px;font-weight:800">Submit HR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature C2: B2B Intelligence -->
+  <div class="feat-block flip" style="border-bottom:none">
+    <div class="feat-content">
+      <div style="display:inline-block;background:#ede9fe;color:#4c1d95;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;margin-bottom:14px">Feature 09  B2B Retail Intelligence</div>
+      <h3>Retail Analytics for Business Partners</h3>
+      <p>Corporate retailer partners access anonymised consumer spending intelligence  the only cross-retailer data source in Sri Lanka. All data is PDPA 2022 compliant.</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-num p">1</div>
+          <p><strong>Log in as a Retail Partner</strong> using your B2B portal credentials (separate from consumer login). Your catchment area and store name appear in the header.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num p">2</div>
+          <p><strong>Read the 4 KPI cards</strong>  Weekly basket size, top spending category, peak shopping hours, and competitor switching rate. All figures update weekly.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num p">3</div>
+          <p><strong>Review the Category Demand chart</strong>  see which product categories are trending in your area vs. the Colombo metro average. Use this to inform stock decisions.</p>
+        </div>
+        <div class="how-step">
+          <div class="how-num p">4</div>
+          <p><strong>Create a discount campaign</strong>  configure a promotion and SpendWise delivers targeted alerts to nearby users who buy your product categories. Track results in the Campaign Cards.</p>
+        </div>
+      </div>
+    </div>
+    <div class="feat-visual">
+      <div class="phone">
+        <div class="phone-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+        <div class="phone-notch"></div>
+        <div class="phone-inner">
+          <div style="background:#4c1d95;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:10px;font-weight:800;color:#fff">Keells Super  Analytics</div><div style="font-size:8px;color:#c4b5fd">April 2026 &bull; Colombo Metro</div></div>
+            <div style="background:#dcfce7;color:#14532d;font-size:7px;font-weight:700;padding:3px 7px;border-radius:6px">PDPA &#128274;</div>
+          </div>
+          <div class="b2b-kpi-grid">
+            <div class="b2b-kpi">
+              <div class="b2b-kpi-label">Weekly Basket</div>
+              <div class="b2b-kpi-val">3,840</div>
+              <div class="b2b-kpi-change change-up">&#8593; 12% vs last wk</div>
+            </div>
+            <div class="b2b-kpi">
+              <div class="b2b-kpi-label">Category Leader</div>
+              <div class="b2b-kpi-val" style="font-size:12px">Groceries</div>
+              <div class="b2b-kpi-change" style="color:#6b7280">68% of basket</div>
+            </div>
+            <div class="b2b-kpi">
+              <div class="b2b-kpi-label">Peak Hours</div>
+              <div class="b2b-kpi-val" style="font-size:14px">6–8 PM</div>
+              <div class="b2b-kpi-change change-up">&#8593; 34% footfall</div>
+            </div>
+            <div class="b2b-kpi">
+              <div class="b2b-kpi-label">Switching Rate</div>
+              <div class="b2b-kpi-val" style="color:#dc2626">18%</div>
+              <div class="b2b-kpi-change change-down">&#8593; to Cargills</div>
+            </div>
+          </div>
+          <!-- Campaign cards -->
+          <div style="padding:0 14px;margin-bottom:8px">
+            <div style="font-size:8px;font-weight:700;color:#9ca3af;margin-bottom:6px">ACTIVE CAMPAIGNS</div>
+            <div style="background:#faf5ff;border:1px solid #7c3aed;border-radius:10px;padding:9px 10px;margin-bottom:6px">
+              <div style="font-size:10px;font-weight:700;color:#0f172a;margin-bottom:6px">&#129382; Fresh Produce 25% Off</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:#7c3aed">4,821</div><div style="font-size:7px;color:#9ca3af">Alerts Sent</div></div>
+                <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:#1d4ed8">1,204</div><div style="font-size:7px;color:#9ca3af">Store Visits</div></div>
+                <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:#16a34a">842K</div><div style="font-size:7px;color:#9ca3af">LKR Lift</div></div>
+              </div>
+            </div>
+            <div style="background:#faf5ff;border:1px solid #7c3aed;border-radius:10px;padding:9px 10px">
+              <div style="font-size:10px;font-weight:700;color:#0f172a;margin-bottom:6px">&#129371; Dairy Bundle Deal</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+                <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:#7c3aed">2,390</div><div style="font-size:7px;color:#9ca3af">Alerts Sent</div></div>
+                <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:#1d4ed8">687</div><div style="font-size:7px;color:#9ca3af">Store Visits</div></div>
+                <div style="text-align:center"><div style="font-size:11px;font-weight:800;color:#16a34a">312K</div><div style="font-size:7px;color:#9ca3af">LKR Lift</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const bars=document.querySelectorAll('[data-h]');
+bars.forEach(b=>{
+  const h=parseInt(b.getAttribute('data-h'));
+  b.style.height=h+'%';
+  b.style.width='100%';
+  b.style.borderRadius='3px 3px 0 0';
+});
+</script>
+</body>
+</html>

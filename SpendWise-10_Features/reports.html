@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise  Page 7: SME Expense Report Generator | CW2 Prototype</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:"Google Sans Flex",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* ── HERO GRID BACKGROUND ── */
+.hero-grid{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,232,122,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,232,122,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 100% 70% at 50% 0%,black,transparent);
+  -webkit-mask-image:radial-gradient(ellipse 100% 70% at 50% 0%,black,transparent);
+}
+.hero-glow{
+  position:fixed;top:-100px;left:50%;transform:translateX(-50%);
+  width:700px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,232,122,0.08),transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── NAV ── */
+.proto-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 40px;background:rgba(5,14,31,0.85);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);
+}
+.proto-logo{font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;}
+.proto-logo span{color:var(--green);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{
+  font-size:11px;font-weight:600;padding:5px 9px;border-radius:8px;
+  color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;
+}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(255,203,71,0.1);color:var(--gold);border-color:rgba(255,203,71,0.25);}
+.proto-badge{font-size:10px;background:rgba(0,232,122,0.1);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:3px 10px;border-radius:100px;font-weight:700;}
+
+/* ── PAGE WRAP ── */
+.page-wrap{max-width:1200px;margin:0 auto;padding:64px 40px 80px;position:relative;z-index:1;}
+
+/* ── PAGE HERO ── */
+.page-hero{margin-bottom:64px;}
+.page-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,203,71,0.08);border:1px solid rgba(255,203,71,0.25);
+  color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;
+}
+.page-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.page-h1{
+  font-size:clamp(42px,5.5vw,66px);font-weight:800;color:#fff;
+  line-height:1.06;letter-spacing:-2.5px;margin-bottom:20px;
+}
+.page-h1 em{font-style:normal;color:var(--green);}
+.page-sub{font-size:18px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;}
+
+/* ── STAT STRIP ── */
+.stat-strip{
+  display:flex;gap:14px;flex-wrap:wrap;margin:32px 0 0;
+}
+.stat-chip{
+  display:flex;align-items:center;gap:12px;
+  background:var(--navy2);border:1px solid var(--border2);
+  border-radius:12px;padding:14px 20px;
+}
+.stat-chip .num{font-size:22px;font-weight:800;color:var(--green);letter-spacing:-0.5px;line-height:1;}
+.stat-chip .lbl{font-size:12px;color:var(--text3);line-height:1.3;}
+
+/* ── SECTION LABEL ── */
+.sec-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+
+/* ── TWO-COLUMN LAYOUT ── */
+.layout-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+
+/* ── CONFIGURATOR CARD ── */
+.config-card{
+  background:var(--navy2);border:1px solid var(--border2);
+  border-radius:20px;padding:32px;
+}
+.config-card h3{font-size:17px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:-0.3px;}
+.config-card .sub{font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.5;}
+
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.field-group{display:flex;flex-direction:column;gap:7px;}
+.field-group label{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);}
+.field-group input,.field-group select{
+  background:var(--navy3);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:var(--font);
+  font-size:14px;padding:11px 14px;outline:none;transition:all .2s;
+}
+.field-group input:focus,.field-group select:focus{
+  border-color:rgba(0,232,122,0.5);
+  box-shadow:0 0 0 3px rgba(0,232,122,0.08);
+}
+select option{background:var(--navy2);}
+
+.cat-label{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.cat-checkboxes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+.cat-check{
+  display:flex;align-items:center;gap:6px;
+  background:var(--navy3);border:1px solid var(--border);
+  border-radius:8px;padding:7px 13px;cursor:pointer;
+  font-size:12px;color:var(--text2);transition:all .2s;user-select:none;
+}
+.cat-check:hover{border-color:rgba(255,203,71,0.3);}
+.cat-check.selected{background:rgba(255,203,71,0.08);border-color:rgba(255,203,71,0.3);color:var(--gold);}
+
+.gen-btn{
+  width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:var(--navy);border:none;border-radius:12px;
+  font-family:var(--font);font-size:15px;font-weight:800;
+  cursor:pointer;transition:all .25s;letter-spacing:-0.2px;
+}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,232,122,0.3);}
+.gen-btn:active{transform:scale(0.98);}
+
+/* ── STEPS ── */
+.steps-section{margin-top:28px;border-top:1px solid var(--border);padding-top:24px;}
+.step-flow{display:flex;flex-direction:column;}
+.step-row{display:flex;gap:16px;align-items:flex-start;position:relative;}
+.step-row:not(:last-child)::after{
+  content:'';position:absolute;left:18px;top:42px;
+  width:2px;height:calc(100% - 8px);
+  background:linear-gradient(to bottom,rgba(0,232,122,0.25),transparent);
+}
+.step-circle{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;color:var(--green);
+}
+.step-body{padding-bottom:22px;flex:1;}
+.step-body h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}
+.step-body p{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* ── PREVIEW AREA ── */
+.preview-placeholder{
+  background:var(--navy2);border:2px dashed rgba(255,255,255,0.08);
+  border-radius:20px;padding:60px 32px;text-align:center;
+}
+.placeholder-icon{font-size:52px;margin-bottom:16px;opacity:0.6;}
+.placeholder-title{font-size:16px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.placeholder-sub{font-size:13px;color:var(--text3);line-height:1.6;}
+
+/* ── REPORT CARD ── */
+.report-card{
+  display:none;background:var(--navy2);
+  border:1px solid var(--border2);border-radius:20px;overflow:hidden;
+}
+.report-topbar{
+  padding:20px 28px;
+  background:linear-gradient(135deg,rgba(0,232,122,0.07),rgba(26,140,255,0.04));
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+}
+.report-biz{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.3px;}
+.report-period-label{font-size:12px;color:var(--text3);margin-top:3px;}
+.report-generated{font-size:11px;color:var(--text3);margin-top:2px;}
+.report-total-box{
+  background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);
+  border-radius:10px;padding:10px 16px;text-align:right;flex-shrink:0;
+}
+.report-total-box .total-label{font-size:10px;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;}
+.report-total-box .total-value{font-size:24px;font-weight:800;color:var(--green);letter-spacing:-0.5px;line-height:1.1;}
+.report-total-box .vat-label{font-size:11px;color:var(--text3);margin-top:2px;}
+
+.report-body{padding:0 28px 8px;overflow-x:auto;}
+.report-table{width:100%;border-collapse:collapse;font-size:13px;min-width:380px;}
+.report-table thead th{
+  text-align:left;font-size:10px;font-weight:700;letter-spacing:0.8px;
+  text-transform:uppercase;color:var(--text3);
+  padding:14px 10px 10px;border-bottom:1px solid var(--border2);
+}
+.report-table thead th:last-child{text-align:right;}
+.report-table tbody td{
+  padding:11px 10px;border-bottom:1px solid var(--border);
+  color:var(--text2);font-size:13px;vertical-align:middle;
+}
+.report-table tbody td:last-child{text-align:right;font-weight:700;color:var(--text);}
+.report-table tbody tr:last-child td{border-bottom:none;}
+.report-table .cat-badge{
+  font-size:10px;padding:2px 8px;border-radius:6px;font-weight:700;
+  background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid var(--border);
+}
+.report-table tfoot td{
+  padding:14px 10px;border-top:2px solid rgba(0,232,122,0.2);
+  font-size:15px;font-weight:800;color:var(--green);
+}
+.report-table tfoot td:last-child{text-align:right;}
+
+.export-row{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+  padding:20px 28px;border-top:1px solid var(--border);
+}
+.exp-btn{
+  padding:12px 10px;border-radius:10px;border:none;
+  font-family:var(--font);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.exp-btn:hover{transform:translateY(-1px);}
+.exp-pdf{background:rgba(255,77,109,0.15);color:var(--red);border:1px solid rgba(255,77,109,0.25);}
+.exp-pdf:hover{background:rgba(255,77,109,0.25);}
+.exp-csv{background:rgba(0,232,122,0.12);color:var(--green);border:1px solid rgba(0,232,122,0.25);}
+.exp-csv:hover{background:rgba(0,232,122,0.2);}
+.exp-email{background:var(--card);color:var(--text2);border:1px solid var(--border);}
+.exp-email:hover{background:rgba(255,255,255,0.07);}
+
+/* ── INFO BOXES ── */
+.limit-box{
+  background:rgba(255,203,71,0.04);border:1px solid rgba(255,203,71,0.18);
+  border-radius:14px;padding:20px 24px;margin-top:16px;
+}
+.limit-box h5{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.limit-box p{font-size:13px;color:var(--text2);line-height:1.65;}
+
+.cw1-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:20px 24px;margin-top:14px;
+}
+.cw1-box p{font-size:13px;color:var(--text2);line-height:1.7;}
+.cw1-box p strong{color:#fff;}
+
+.proto-notice{
+  display:flex;align-items:flex-start;gap:14px;
+  background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.18);
+  border-radius:14px;padding:18px 22px;margin-top:40px;
+}
+.proto-notice p{font-size:13px;color:var(--text3);line-height:1.65;}
+.proto-notice p strong{color:var(--blue);}
+
+/* ── NAV FOOTER ── */
+.page-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
+}
+.page-footer a{font-size:13px;color:var(--green);text-decoration:none;font-weight:600;transition:opacity .2s;}
+.page-footer a:hover{opacity:0.7;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .page-wrap{padding:40px 20px 60px;}
+  .proto-pages{display:none;}
+  .layout-grid{grid-template-columns:1fr;}
+  .field-row{grid-template-columns:1fr;}
+  .export-row{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero-grid"></div>
+<div class="hero-glow"></div>
+
+
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <h1 class="page-h1">SME One-Click<br><em>Expense Report</em><br>Generator</h1>
+    <p class="page-sub">
+      Turn a full month of auto-tracked business expenses into a professional report in a single click.
+      <strong>Accountant-ready, Inland Revenue formatted</strong>  at LKR 1,500/mo
+      versus LKR 15,000+ for QuickBooks.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">1 click</div><div class="lbl">Full report generated</div></div>
+      <div class="stat-chip"><div class="num">PDF + CSV</div><div class="lbl">Export formats</div></div>
+      <div class="stat-chip"><div class="num">IRD</div><div class="lbl">Inland Revenue ready</div></div>
+      <div class="stat-chip"><div class="num">90%</div><div class="lbl">QuickBooks features, 10% cost</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="layout-grid">
+
+    <!-- LEFT  CONFIGURATOR -->
+    <div>
+      <div class="sec-label">Configure your report</div>
+      <div class="config-card">
+        <h3>Report Settings</h3>
+        <p class="sub">Select your period, type, and categories  then hit generate.</p>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label>Business Name</label>
+            <input type="text" id="biz-name" value="Senajith Consulting (Pvt) Ltd">
+          </div>
+          <div class="field-group">
+            <label>Report Period</label>
+            <select id="rpt-period">
+              <option>March 2026</option>
+              <option selected>April 2026</option>
+              <option>Q1 2026 (Jan–Mar)</option>
+              <option>FY 2025/2026</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row" style="margin-bottom:20px;">
+          <div class="field-group">
+            <label>Report Type</label>
+            <select>
+              <option>Expense Summary</option>
+              <option selected>Itemised Expense Report</option>
+              <option>VAT-Only Report (IRD)</option>
+              <option>Reimbursement Claim</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label>Currency</label>
+            <select><option selected>LKR  Sri Lankan Rupee</option><option>USD</option></select>
+          </div>
+        </div>
+
+        <div class="cat-label">Include categories</div>
+        <div class="cat-checkboxes">
+          <div class="cat-check selected" onclick="this.classList.toggle('selected')">🛒 Groceries</div>
+          <div class="cat-check selected" onclick="this.classList.toggle('selected')">🍽️ Dining &amp; Meals</div>
+          <div class="cat-check selected" onclick="this.classList.toggle('selected')">⛽ Fuel &amp; Travel</div>
+          <div class="cat-check selected" onclick="this.classList.toggle('selected')">✈️ Accommodation</div>
+          <div class="cat-check selected" onclick="this.classList.toggle('selected')">📱 Software / SaaS</div>
+          <div class="cat-check" onclick="this.classList.toggle('selected')">🏥 Medical</div>
+          <div class="cat-check" onclick="this.classList.toggle('selected')">🎓 Training</div>
+        </div>
+
+        <button class="gen-btn" onclick="generateReport()">⚡ Generate Report Now</button>
+      </div>
+
+      <!-- STEPS -->
+      <div class="steps-section">
+        <div class="sec-label" style="margin-bottom:18px;">What happens when you click generate</div>
+        <div class="step-flow">
+          <div class="step-row">
+            <div class="step-circle">1</div>
+            <div class="step-body">
+              <h4>Transactions filtered</h4>
+              <p>All SMS-parsed and manually entered transactions for the selected period and categories are retrieved from the user's encrypted data store.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-circle">2</div>
+            <div class="step-body">
+              <h4>Report template applied</h4>
+              <p>A professional layout is applied  company name, period, IRD VAT registration number, itemised table sorted by date, category subtotals, and grand total.</p>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-circle">3</div>
+            <div class="step-body" style="padding-bottom:0;">
+              <h4>Export as PDF or CSV</h4>
+              <p>PDF via server-side rendering (Puppeteer / ReportLab). CSV exported as UTF-8 for direct accountant import. Both available instantly  no waiting.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT  PREVIEW -->
+    <div>
+      <div class="sec-label">Report preview</div>
+
+      <div class="preview-placeholder" id="placeholder">
+        <div class="placeholder-icon">📄</div>
+        <div class="placeholder-title">Your report will appear here</div>
+        <div class="placeholder-sub">Configure your settings on the left,<br>then click "Generate Report Now"</div>
+      </div>
+
+      <div class="report-card" id="report-card">
+        <div class="report-topbar">
+          <div>
+            <div class="report-biz" id="rpt-biz">Senajith Consulting (Pvt) Ltd</div>
+            <div class="report-period-label" id="rpt-period-out">Expense Report  April 2026</div>
+            <div class="report-generated">Generated: 03 April 2026 · SpendWise v2.0 · IRD Formatted</div>
+          </div>
+          <div class="report-total-box">
+            <div class="total-label">Total Expenses</div>
+            <div class="total-value">LKR 47,340</div>
+            <div class="vat-label">VAT claimable: LKR 4,280</div>
+          </div>
+        </div>
+
+        <div class="report-body">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Merchant</th>
+                <th>Category</th>
+                <th style="text-align:right;">Amount (LKR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>01 Apr</td>
+                <td>Keells Super</td>
+                <td><span class="cat-badge">Groceries</span></td>
+                <td>2,840</td>
+              </tr>
+              <tr>
+                <td>01 Apr</td>
+                <td>Barista Coffee</td>
+                <td><span class="cat-badge">Dining</span></td>
+                <td>680</td>
+              </tr>
+              <tr>
+                <td>31 Mar</td>
+                <td>Lanka IOC</td>
+                <td><span class="cat-badge">Fuel</span></td>
+                <td>4,500</td>
+              </tr>
+              <tr>
+                <td>30 Mar</td>
+                <td>Cinnamon Grand</td>
+                <td><span class="cat-badge">Accommodation</span></td>
+                <td>18,400</td>
+              </tr>
+              <tr>
+                <td>29 Mar</td>
+                <td>FlyHub SaaS</td>
+                <td><span class="cat-badge">Software</span></td>
+                <td>3,200</td>
+              </tr>
+              <tr>
+                <td>28 Mar</td>
+                <td>Munchee Ltd (Inv.)</td>
+                <td><span class="cat-badge">Dining</span></td>
+                <td>12,400</td>
+              </tr>
+              <tr>
+                <td>27 Mar</td>
+                <td>Nawaloka Pharmacy</td>
+                <td><span class="cat-badge">Medical</span></td>
+                <td>5,320</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">Grand Total</td>
+                <td>47,340</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="export-row">
+          <button class="exp-btn exp-pdf" onclick="alert('Final version: downloads IRD-formatted PDF')">📄 Download PDF</button>
+          <button class="exp-btn exp-csv" onclick="alert('Final version: downloads CSV for accountant')">📊 Export CSV</button>
+          <button class="exp-btn exp-email" onclick="alert('Final version: emails to your accountant')">✉️ Email Accountant</button>
+        </div>
+      </div>
+
+      <div class="limit-box">
+        <h5>Prototype Limitation</h5>
+        <p>The report above is a static design template demonstrating the intended layout. In the final product, reports are generated dynamically from real transaction data using a server-side PDF engine (Puppeteer or ReportLab). IRD-formatted VAT summaries and category subtotals are computed live from the user's encrypted expense database.</p>
+      </div>
+
+      <div class="cw1-box">
+        <div class="sec-label" style="margin-bottom:8px;">Traceability</div>
+        <p>Implements <strong>FR-09</strong> and <strong>CSF-02</strong> ("QuickBooks alternative") from CW1. Addresses the <strong>Competitive Analysis</strong> finding that no Sri Lankan app provides IRD-formatted SME expense reports. The LKR 1,500/mo vs LKR 15,000+ QuickBooks positioning is drawn directly from pricing strategy and Porter's Five Forces analysis.</p>
+      </div>
+    </div>
+
+  </div><!-- /layout-grid -->
+
+  <div class="proto-notice">
+    <span style="font-size:18px;flex-shrink:0;margin-top:1px;">ℹ️</span>
+    <p><strong>Prototype Note:</strong> Clicking "Generate Report Now" reveals a static report preview demonstrating the intended layout, table structure, and export options. Full implementation requires server-side PDF generation, live transaction data aggregation, IRD schema validation, and secure email delivery via SMTP. All design specifications shown represent the complete intended functionality of this feature.</p>
+  </div>
+  
+ <div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="receipt-scan.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">← Page 06: Receipt Scanner (OCR)</a>
+    <a href="reimbursements.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">Page 08: Reimbursement Tracker →</a>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+function generateReport(){
+  document.getElementById('placeholder').style.display='none';
+  const card=document.getElementById('report-card');
+  card.style.display='block';
+  document.getElementById('rpt-biz').textContent=document.getElementById('biz-name').value||'Your Business';
+  document.getElementById('rpt-period-out').textContent='Expense Report  '+document.getElementById('rpt-period').value;
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>

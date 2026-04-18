@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise  Feature 01: Real-Time Pre-Purchase Alert | CW2 Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;--navy4:#0d1f3c;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* ─── AMBIENT BG ─── */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,232,122,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,0.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);}
+.bg-glow{position:fixed;top:-15%;left:50%;transform:translateX(-50%);width:800px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,232,122,0.08) 0%,rgba(26,140,255,0.03) 45%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb{position:fixed;bottom:5%;right:-8%;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(26,140,255,0.05),transparent 70%);pointer-events:none;z-index:0;}
+
+/* ─── NAV ─── */
+.proto-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 40px;background:rgba(5,14,31,0.85);
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.nav-left{display:flex;align-items:center;gap:16px;}
+.proto-logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.proto-logo span{color:var(--green);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 10px;border-radius:8px;color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;letter-spacing:0.3px;}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(0,232,122,0.1);color:var(--green);border-color:rgba(0,232,122,0.22);}
+.proto-badge{font-family:var(--mono);font-size:10px;background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:4px 12px;border-radius:100px;font-weight:500;letter-spacing:0.5px;}
+
+/* ─── PAGE WRAP ─── */
+.page-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 40px 100px;}
+
+/* ─── HERO ─── */
+.page-hero{margin-bottom:64px;}
+.page-tag{
+  display:inline-flex;align-items:center;gap:9px;
+  background:rgba(0,232,122,0.07);border:1px solid rgba(0,232,122,0.2);
+  color:var(--green);font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:100px;
+  margin-bottom:24px;
+}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+
+.page-h1{
+  font-size:clamp(38px,5.5vw,62px);font-weight:800;color:#fff;
+  line-height:1.07;letter-spacing:-2.5px;margin-bottom:18px;
+}
+.page-h1 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--green) 0%,#00d4f0 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.page-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;font-weight:700;}
+
+/* ─── STAT CHIPS ─── */
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 0;}
+.stat-chip{
+  background:rgba(11,26,49,0.8);border:1px solid var(--border2);border-radius:14px;
+  padding:16px 22px;text-align:center;
+  backdrop-filter:blur(10px);
+  transition:border-color .2s,transform .2s;
+}
+.stat-chip:hover{border-color:rgba(0,232,122,0.3);transform:translateY(-2px);}
+.stat-chip .num{
+  font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;
+  background:linear-gradient(135deg,var(--green),#00d4f0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-chip .lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);letter-spacing:0.2px;}
+
+/* ─── MAIN GRID ─── */
+.main-grid{
+  display:grid;
+  grid-template-columns:1.05fr 0.95fr;
+  gap:48px;align-items:start;
+}
+
+/* ─── SECTION LABELS ─── */
+.sec-label{
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--text3);}
+
+/* ─── STEP FLOW ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;}
+.step-item-row{display:flex;gap:18px;align-items:flex-start;position:relative;}
+.step-item-row:not(:last-child)::after{
+  content:'';position:absolute;left:18px;top:42px;
+  width:2px;height:calc(100% + 4px);
+  background:linear-gradient(to bottom,rgba(0,232,122,0.25),rgba(0,232,122,0.04));
+}
+.step-num-circle{
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(0,232,122,0.08);border:1.5px solid rgba(0,232,122,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:13px;font-weight:500;color:var(--green);flex-shrink:0;
+  transition:all .2s;
+}
+.step-item-row:hover .step-num-circle{background:rgba(0,232,122,0.14);border-color:rgba(0,232,122,0.45);}
+.step-body{padding-bottom:28px;flex:1;}
+.step-body h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:5px;letter-spacing:-0.3px;}
+.step-body p{font-size:13px;color:var(--text2);line-height:1.65;}
+
+.step-last .step-num-circle{background:rgba(255,203,71,0.08);border-color:rgba(255,203,71,0.3);color:var(--gold);}
+
+/* ─── LIMITATION BOX ─── */
+.limit-box{
+  background:rgba(255,203,71,0.04);
+  border:1px solid rgba(255,203,71,0.18);
+  border-radius:14px;padding:18px 22px;margin-top:12px;
+}
+.limit-box h5{
+  font-family:var(--mono);font-size:10px;font-weight:500;
+  color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;
+}
+.limit-box p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+
+/* ─── PHONE DEMO ─── */
+.demo-col{}
+.phone-frame{
+  background:var(--navy3);border-radius:32px;
+  border:1.5px solid var(--border2);
+  padding:22px 18px;
+  box-shadow:0 32px 80px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.04);
+  position:relative;overflow:hidden;
+}
+.phone-frame::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:90px;height:3px;background:linear-gradient(90deg,transparent,rgba(0,232,122,0.5),transparent);
+  border-radius:0 0 4px 4px;
+}
+.phone-status{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:18px;padding:0 4px;}
+
+.notification-card{
+  background:#fff;border-radius:18px;padding:15px 16px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.25);
+  animation:dropIn .65s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-18px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.notif-header{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.notif-icon{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,#00e87a,#00b8f5);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.notif-app{font-size:11px;font-weight:700;color:#333;text-transform:uppercase;letter-spacing:0.5px;}
+.notif-time{font-size:10px;color:#aaa;margin-left:auto;}
+.notif-title{font-size:14px;font-weight:800;color:#111;margin-bottom:5px;letter-spacing:-0.2px;}
+.notif-body{font-size:12px;color:#555;line-height:1.55;}
+.notif-save{
+  display:inline-block;background:#00e87a;color:#050e1f;
+  font-size:11px;font-weight:800;padding:5px 12px;border-radius:9px;margin-top:9px;
+  letter-spacing:0.3px;
+}
+.alert-cta{display:flex;gap:8px;margin-top:12px;}
+.btn-tap{flex:1;padding:11px;border-radius:11px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s;}
+.btn-tap.accept{background:#00e87a;color:#050e1f;}
+.btn-tap.accept:hover{background:#00c465;transform:scale(1.02);}
+.btn-tap.dismiss{background:rgba(0,0,0,0.06);color:#666;border:1px solid #ddd;}
+.btn-tap.dismiss:hover{background:rgba(0,0,0,0.1);}
+
+/* ─── STORE COMPARISON ─── */
+.geofence-visual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.store-card{
+  background:rgba(5,14,31,0.7);border:1px solid var(--border);
+  border-radius:13px;padding:13px 12px;
+  display:flex;align-items:center;gap:10px;
+  transition:border-color .2s;
+}
+.store-card.cheaper{border-color:rgba(0,232,122,0.3);background:rgba(0,232,122,0.04);}
+.store-card.current{border-color:rgba(255,77,109,0.2);}
+.store-icon{font-size:22px;flex-shrink:0;}
+.store-info .name{font-size:12px;font-weight:700;color:var(--text);}
+.store-info .dist{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.store-info .price{font-size:12px;font-weight:700;margin-top:3px;font-family:var(--mono);}
+.price.cheaper{color:var(--green);}
+.price.dearer{color:var(--red);}
+
+/* ─── BUDGET BAR ─── */
+.budget-bar-wrap{
+  margin-top:14px;
+  background:rgba(0,232,122,0.04);
+  border:1px solid rgba(0,232,122,0.12);
+  border-radius:12px;padding:12px 14px;
+}
+.budget-bar-label{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:7px;letter-spacing:0.5px;}
+.budget-bar-track{height:6px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;}
+.budget-bar-fill{width:78%;height:100%;background:linear-gradient(90deg,var(--gold),#ff9a3c);border-radius:4px;}
+.budget-bar-note{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;}
+
+/* ─── VS COMPARISON ─── */
+.vs-section{margin-top:28px;}
+.vs-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.vs-card{border-radius:14px;padding:16px 18px;}
+.vs-us{background:rgba(0,232,122,0.05);border:1px solid rgba(0,232,122,0.18);}
+.vs-them{background:rgba(255,77,109,0.04);border:1px solid rgba(255,77,109,0.14);}
+.vs-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;}
+.vs-us .vs-label{color:var(--green);}
+.vs-them .vs-label{color:var(--red);}
+.vs-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.vs-list li{font-size:12.5px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;line-height:1.4;}
+.vs-us .vs-list li::before{content:"✓";color:var(--green);font-weight:800;flex-shrink:0;font-size:11px;}
+.vs-them .vs-list li::before{content:"✗";color:var(--red);font-weight:800;flex-shrink:0;font-size:11px;}
+
+/* ─── BOTTOM CARDS ─── */
+.bottom-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px;}
+.sw-card{
+  background:rgba(11,26,49,0.8);border:1px solid var(--border);
+  border-radius:18px;padding:24px;
+  backdrop-filter:blur(10px);
+  transition:all .25s;
+}
+.sw-card:hover{border-color:rgba(0,232,122,0.2);transform:translateY(-3px);box-shadow:0 20px 50px rgba(0,0,0,0.3);}
+.card-icon-box{
+  width:44px;height:44px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:16px;border:1px solid;
+}
+
+/* ─── PROTO NOTICE ─── */
+.proto-notice{
+  display:flex;align-items:flex-start;gap:14px;
+  background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.16);
+  border-radius:14px;padding:16px 20px;margin-top:48px;
+}
+.proto-notice .notice-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.proto-notice p{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.proto-notice p strong{color:var(--blue);}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .65s ease both;}
+.anim-up-2{animation:fadeUp .65s ease 0.12s both;}
+.anim-up-3{animation:fadeUp .65s ease 0.22s both;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .main-grid{grid-template-columns:1fr;}
+  .bottom-cards{grid-template-columns:1fr;}
+  .page-wrap{padding:40px 20px 80px;}
+  .proto-pages{display:none;}
+}
+@media(max-width:600px){
+  .vs-row{grid-template-columns:1fr;}
+  .stat-strip{gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb"></div>
+
+
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero anim-up">
+    
+    <h1 class="page-h1">Real-Time<br><em>Pre-Purchase Alert</em></h1>
+    <p class="page-sub">
+      Sri Lanka's only budgeting feature that intervenes <strong>before money leaves your account.</strong>
+      When you enter a store geofence, SpendWise checks nearby alternatives and pushes a rich alert with the exact LKR saving  in under 3 seconds.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">&lt;3s</div><div class="lbl">Alert delivery</div></div>
+      <div class="stat-chip"><div class="num">LKR 800</div><div class="lbl">Avg single-trip saving</div></div>
+      <div class="stat-chip"><div class="num">0</div><div class="lbl">SL competitors doing this</div></div>
+      <div class="stat-chip"><div class="num">73%</div><div class="lbl">Abandonment rate solved</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Step Flow -->
+    <div class="anim-up-2">
+      <div class="sec-label">How It Works  Step by Step</div>
+
+      <div class="step-flow">
+        <div class="step-item-row">
+          <div class="step-num-circle">1</div>
+          <div class="step-body">
+            <h4>GPS Geofence Trigger</h4>
+            <p>User walks within 150m of a registered retail location (Keells, Cargills, Arpico, etc.). Background location service fires a geofence entry event using Android/iOS significant-location-change API  minimal battery impact.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">2</div>
+          <div class="step-body">
+            <h4>Budget Status Check</h4>
+            <p>App instantly checks if the user's Groceries category is within 20% of their monthly budget limit. If budget is healthy, no alert fires  zero notification fatigue. If approaching the limit, the alert pipeline activates.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">3</div>
+          <div class="step-body">
+            <h4>Competitor Price API Query</h4>
+            <p>SpendWise queries its retail discount database  updated daily via B2B partnerships with participating retailers. Pulls current promotions within 600m for the user's most-purchased product categories.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">4</div>
+          <div class="step-body">
+            <h4>Push Notification Fired</h4>
+            <p>If a cheaper alternative exists, a rich push notification is sent showing the saving in LKR, store name, and distance. Tapping opens the in-app Savings Map (Feature 04) with walking directions pre-loaded.</p>
+          </div>
+        </div>
+        <div class="step-item-row step-last">
+          <div class="step-num-circle">5</div>
+          <div class="step-body">
+            <h4>User Decision + Feedback Loop</h4>
+            <p>User taps "Go to Cargills" or "Stay at Keells". Either choice is logged. If a user ignores 5+ alerts for the same store pair, alert frequency is intelligently reduced  suppression prevents annoyance over time.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="limit-box">
+        <h5>⚠ Prototype Limitation</h5>
+        <p>The notification is simulated as a static UI card. Full production requires: Firebase Cloud Messaging for push delivery, Background Geofence SDK (Google Awareness API / iOS Core Location), and a live retailer discount database with a daily update pipeline.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Demo -->
+    <div class="anim-up-3">
+      <div class="sec-label" style="margin-bottom:18px;">Live Demo  Notification Mockup</div>
+
+      <div class="phone-frame">
+        <div class="phone-status">
+          <span>9:41 AM</span>
+          <span>SpendWise · Alert</span>
+        </div>
+
+        <div class="notification-card">
+          <div class="notif-header">
+            <div class="notif-icon">💰</div>
+            <div class="notif-app">SpendWise</div>
+            <div class="notif-time">just now</div>
+          </div>
+          <div class="notif-title">Save LKR 840 on groceries!</div>
+          <div class="notif-body">You're near Keells (Nugegoda). Cargills FoodCity is 380m away with 25% off fresh produce  your usual basket is cheaper there today.</div>
+          <span class="notif-save">Estimated saving: LKR 840</span>
+          <div class="alert-cta">
+            <button class="btn-tap accept" onclick="this.textContent='✓ Navigating…';this.style.opacity='.7'">Go to Cargills →</button>
+            <button class="btn-tap dismiss" onclick="this.textContent='Dismissed'">Stay here</button>
+          </div>
+        </div>
+
+        <div class="geofence-visual">
+          <div class="store-card current">
+            <div class="store-icon">🏪</div>
+            <div class="store-info">
+              <div class="name">Keells Nugegoda</div>
+              <div class="dist">YOU ARE HERE</div>
+              <div class="price dearer">LKR 4,200</div>
+            </div>
+          </div>
+          <div class="store-card cheaper">
+            <div class="store-icon">🛒</div>
+            <div class="store-info">
+              <div class="name">Cargills FoodCity</div>
+              <div class="dist">380m away</div>
+              <div class="price cheaper">LKR 3,360 ✓</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="budget-bar-wrap">
+          <div class="budget-bar-label">GROCERIES BUDGET  THIS MONTH</div>
+          <div class="budget-bar-track">
+            <div class="budget-bar-fill"></div>
+          </div>
+          <div class="budget-bar-note">LKR 7,800 used of LKR 10,000 &nbsp;·&nbsp; 78% spent</div>
+        </div>
+      </div>
+
+      <!-- VS Comparison -->
+      <div class="vs-section">
+        <div class="sec-label">SpendWise vs Competitors</div>
+        <div class="vs-row">
+          <div class="vs-card vs-us">
+            <div class="vs-label">SpendWise</div>
+            <ul class="vs-list">
+              <li>Alerts before you spend</li>
+              <li>Location-triggered, real time</li>
+              <li>Shows LKR saving amount</li>
+              <li>Linked to budget status</li>
+            </ul>
+          </div>
+          <div class="vs-card vs-them">
+            <div class="vs-label">Mint / FREMI / Toshl</div>
+            <ul class="vs-list">
+              <li>Shows what you already spent</li>
+              <li>No location awareness</li>
+              <li>No pre-purchase intervention</li>
+              <li>Generic monthly summaries</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /main-grid -->
+
+  <!-- BOTTOM INFO CARDS -->
+  <div class="bottom-cards">
+    <div class="sw-card">
+      <div class="card-icon-box" style="background:rgba(0,232,122,0.08);border-color:rgba(0,232,122,0.2);">👤</div>
+      <div class="sec-label">Who Benefits</div>
+      <p style="font-size:13.5px;color:var(--text2);line-height:1.65;">Personal users grocery shopping in urban Sri Lanka  Colombo, Kandy, Galle. Primarily the <strong style="color:#fff;">Geolocation-Based Saver</strong> persona identified in the target market analysis.</p>
+    </div>
+    <div class="sw-card">
+      <div class="card-icon-box" style="background:rgba(26,140,255,0.08);border-color:rgba(26,140,255,0.2);">📋</div>
+      <div class="sec-label">Traceability</div>
+      <p style="font-size:13.5px;color:var(--text2);line-height:1.65;">Directly implements UC3 (Receive Real-Time Spending Alert), fulfilling FR-01 and CSF-01 by enabling pre-purchase intervention and mitigating the high rate of user abandonment observed during the checkout stage.</p>
+    </div>
+    <div class="sw-card">
+      <div class="card-icon-box" style="background:rgba(255,203,71,0.08);border-color:rgba(255,203,71,0.2);">⚙️</div>
+      <div class="sec-label">Final Version Needs</div>
+      <p style="font-size:13.5px;color:var(--text2);line-height:1.65;">Firebase FCM, Android Awareness API + iOS Core Location, daily retailer discount database, geofence radius tuning (150m default), and an alert-suppression ML model to prevent notification fatigue.</p>
+    </div>
+  </div>
+ <div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);">
+    <span style="font-size:13px;color:var(--text3);">← No previous page</span>
+    <a href="dashboards.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">Page 02: Persona Dashboard→</a>
+  </div>
+  
+  </div>
+
+</div>
+</body>
+</html>

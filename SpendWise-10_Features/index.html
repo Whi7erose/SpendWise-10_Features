@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise — CW2 Prototype | 6BUIS018C</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;
+  --navy2:#0b1a31;
+  --navy3:#112040;
+  --green:#00e87a;
+  --green2:#00c465;
+  --blue:#1a8cff;
+  --gold:#ffcb47;
+  --purple:#a855f7;
+  --red:#ff4d6d;
+  --text:#e8f0fe;
+  --text2:#8ca5c8;
+  --text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+
+body{
+  background:var(--navy);
+  color:var(--text);
+  font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  font-size:16px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* ─── AMBIENT BACKGROUND ─── */
+.bg-grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,232,122,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,232,122,0.04) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,black 0%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,black 0%,transparent 100%);
+}
+.bg-glow{
+  position:fixed;top:-20%;left:50%;transform:translateX(-50%);
+  width:900px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,232,122,0.09) 0%,rgba(26,140,255,0.04) 40%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.bg-orb-left{
+  position:fixed;bottom:10%;left:-10%;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(26,140,255,0.06),transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* ─── NAV ─── */
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 48px;
+  background:rgba(5,14,31,0.8);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.nav-logo{
+  font-size:19px;font-weight:800;color:#fff;
+  letter-spacing:-0.6px;display:flex;align-items:center;gap:8px;
+}
+.nav-logo .logo-mark{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.nav-logo span{color:var(--green);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.nav-badge{
+  font-family:var(--mono);
+  font-size:10px;
+  background:rgba(0,232,122,0.1);
+  color:var(--green);
+  border:1px solid rgba(0,232,122,0.25);
+  padding:5px 12px;border-radius:100px;font-weight:500;
+  letter-spacing:0.5px;
+}
+.nav-meta{font-size:11px;color:var(--text3);font-family:var(--mono);}
+
+/* ─── HERO ─── */
+.hero{
+  position:relative;z-index:1;
+  max-width:860px;margin:0 auto;
+  padding:80px 40px 64px;
+  text-align:center;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(0,232,122,0.07);
+  border:1px solid rgba(0,232,122,0.2);
+  color:var(--green);
+  font-size:11px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;padding:7px 18px;border-radius:100px;
+  margin-bottom:32px;
+  animation:fadeDown 0.6s ease both;
+}
+.hero-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:pulse 2.2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+.hero-title{
+  font-size:clamp(42px,6vw,70px);
+  font-weight:800;
+  color:#fff;
+  line-height:1.06;
+  letter-spacing:-3px;
+  margin-bottom:22px;
+  animation:fadeUp 0.7s ease 0.1s both;
+}
+.hero-title em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--green) 0%,#00b8f5 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:17px;
+  color:var(--text2);
+  max-width:540px;
+  margin:0 auto 40px;
+  line-height:1.75;
+  animation:fadeUp 0.7s ease 0.2s both;
+}
+.hero-sub strong{color:#fff;font-weight:700;}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--green);color:var(--navy);
+  text-decoration:none;
+  padding:16px 44px;border-radius:14px;
+  font-size:15px;font-weight:800;letter-spacing:-0.2px;
+  transition:all .2s;
+  box-shadow:0 0 40px rgba(0,232,122,0.25);
+  animation:fadeUp 0.7s ease 0.3s both;
+}
+.hero-cta:hover{
+  background:var(--green2);
+  transform:translateY(-3px);
+  box-shadow:0 0 60px rgba(0,232,122,0.35);
+}
+.hero-cta-arrow{
+  font-size:18px;
+  transition:transform .2s;
+}
+.hero-cta:hover .hero-cta-arrow{transform:translateX(4px);}
+
+.hero-manual-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:16px;padding:13px 30px;
+  border:1px solid var(--border2);border-radius:12px;
+  color:var(--text3);text-decoration:none;font-size:13px;
+  font-weight:600;letter-spacing:0.3px;
+  transition:all .2s;background:var(--card);
+  animation:fadeUp 0.7s ease 0.4s both;
+}
+.hero-manual-btn:hover{
+  color:#fff;border-color:rgba(255,255,255,0.25);
+  background:rgba(255,255,255,0.06);
+  transform:translateY(-2px);
+}
+
+/* ─── STATS ─── */
+.stats-wrap{
+  position:relative;z-index:1;
+  max-width:760px;margin:48px auto 0;
+  animation:fadeUp 0.8s ease 0.45s both;
+}
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  overflow:hidden;
+  background:rgba(11,26,49,0.7);
+  backdrop-filter:blur(12px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.stat{
+  padding:22px 16px;text-align:center;
+  border-right:1px solid var(--border);
+  transition:background 0.2s;
+}
+.stat:last-child{border-right:none;}
+.stat:hover{background:rgba(0,232,122,0.04);}
+.stat-n{
+  font-size:28px;font-weight:800;
+  background:linear-gradient(135deg,var(--green),#00d4f0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-0.5px;line-height:1;margin-bottom:5px;
+}
+.stat-l{font-size:11px;color:var(--text3);line-height:1.4;font-weight:500;}
+
+/* ─── MAIN ─── */
+.main{
+  position:relative;z-index:1;
+  max-width:1100px;margin:0 auto;
+  padding:80px 40px 100px;
+}
+
+/* ─── SECTION INTRO ─── */
+.section-intro{
+  text-align:center;
+  margin-bottom:64px;
+}
+.section-badge{
+  display:inline-block;
+  background:rgba(26,140,255,0.08);
+  border:1px solid rgba(26,140,255,0.2);
+  color:var(--blue);
+  font-size:10px;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;padding:6px 14px;border-radius:100px;
+  margin-bottom:18px;font-family:var(--mono);
+}
+.section-title{
+  font-size:clamp(36px,4vw,54px);
+  font-weight:800;color:#fff;line-height:1.1;
+  letter-spacing:-2px;margin-bottom:14px;
+}
+.section-title em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.section-sub{
+  font-size:17px;color:var(--text2);
+  max-width:600px;margin:0 auto;
+  line-height:1.75;
+}
+.section-sub strong{color:#fff;}
+
+/* ─── CATEGORY SECTION ─── */
+.cat-section{margin-bottom:56px;}
+
+.cat-header{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:18px;
+}
+.cat-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);}
+.cat-pill{
+  display:flex;align-items:center;gap:10px;
+  border:1px solid;border-radius:100px;
+  padding:9px 22px;white-space:nowrap;flex-shrink:0;
+  transition:all 0.2s;
+}
+.cat-pill-icon{font-size:16px;}
+.cat-pill-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:var(--mono);}
+
+.cat-p .cat-pill{border-color:rgba(26,140,255,0.3);background:rgba(26,140,255,0.06);}
+.cat-p .cat-pill-label{color:var(--blue);}
+.cat-s .cat-pill{border-color:rgba(255,203,71,0.3);background:rgba(255,203,71,0.06);}
+.cat-s .cat-pill-label{color:var(--gold);}
+.cat-c .cat-pill{border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.06);}
+.cat-c .cat-pill-label{color:var(--purple);}
+
+/* ─── CATEGORY DESCRIPTION BLOCK ─── */
+.cat-desc-row{
+  display:flex;align-items:flex-start;gap:20px;
+  padding:20px 24px;border-radius:14px;
+  margin-bottom:20px;position:relative;overflow:hidden;
+}
+.cat-desc-row::before{
+  content:'';position:absolute;right:-30px;top:-30px;
+  width:120px;height:120px;border-radius:50%;
+  opacity:0.08;
+}
+.cat-p .cat-desc-row{background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.12);}
+.cat-p .cat-desc-row::before{background:var(--blue);}
+.cat-s .cat-desc-row{background:rgba(255,203,71,0.05);border:1px solid rgba(255,203,71,0.12);}
+.cat-s .cat-desc-row::before{background:var(--gold);}
+.cat-c .cat-desc-row{background:rgba(168,85,247,0.05);border:1px solid rgba(168,85,247,0.12);}
+.cat-c .cat-desc-row::before{background:var(--purple);}
+
+.cat-desc-icon{
+  font-size:28px;flex-shrink:0;line-height:1;
+  margin-top:3px;
+}
+.cat-desc-text h3{
+  font-size:16px;font-weight:700;color:#fff;
+  margin-bottom:5px;letter-spacing:-0.3px;
+}
+.cat-desc-text p{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* ─── FEATURE CARDS ─── */
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.feat-grid-3{grid-template-columns:1fr 1fr 1fr;}
+
+.feat-card{
+  display:flex;align-items:flex-start;gap:16px;
+  background:rgba(11,26,49,0.8);
+  border:1px solid var(--border);
+  border-radius:18px;padding:22px 20px;
+  text-decoration:none;transition:all .25s;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.feat-card::after{
+  content:'';
+  position:absolute;inset:0;border-radius:18px;
+  opacity:0;transition:opacity 0.25s;
+}
+.cat-p .feat-card:hover{border-color:rgba(26,140,255,0.45);transform:translateY(-4px);}
+.cat-p .feat-card::after{background:radial-gradient(ellipse at top left,rgba(26,140,255,0.06),transparent);}
+.cat-s .feat-card:hover{border-color:rgba(255,203,71,0.45);transform:translateY(-4px);}
+.cat-s .feat-card::after{background:radial-gradient(ellipse at top left,rgba(255,203,71,0.06),transparent);}
+.cat-c .feat-card:hover{border-color:rgba(168,85,247,0.45);transform:translateY(-4px);}
+.cat-c .feat-card::after{background:radial-gradient(ellipse at top left,rgba(168,85,247,0.06),transparent);}
+.feat-card:hover::after{opacity:1;}
+.feat-card:hover{box-shadow:0 20px 50px rgba(0,0,0,0.35);}
+
+.feat-left{
+  display:flex;flex-direction:column;align-items:center;
+  gap:6px;flex-shrink:0;
+}
+.feat-num{
+  font-family:var(--mono);
+  font-size:10px;font-weight:500;
+  color:var(--text3);letter-spacing:0.5px;
+}
+.feat-icon-box{
+  width:50px;height:50px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;border:1px solid;
+  transition:transform .2s, box-shadow .2s;
+  position:relative;z-index:1;
+}
+.feat-card:hover .feat-icon-box{transform:scale(1.08) rotate(-2deg);}
+.cat-p .feat-icon-box{
+  background:rgba(26,140,255,0.09);border-color:rgba(26,140,255,0.22);
+}
+.cat-p .feat-card:hover .feat-icon-box{box-shadow:0 0 20px rgba(26,140,255,0.2);}
+.cat-s .feat-icon-box{
+  background:rgba(255,203,71,0.09);border-color:rgba(255,203,71,0.22);
+}
+.cat-s .feat-card:hover .feat-icon-box{box-shadow:0 0 20px rgba(255,203,71,0.2);}
+.cat-c .feat-icon-box{
+  background:rgba(168,85,247,0.09);border-color:rgba(168,85,247,0.22);
+}
+.cat-c .feat-card:hover .feat-icon-box{box-shadow:0 0 20px rgba(168,85,247,0.2);}
+
+.feat-body{flex:1;min-width:0;position:relative;z-index:1;}
+.feat-title{
+  font-size:14px;font-weight:700;color:#fff;
+  margin-bottom:5px;letter-spacing:-0.3px;line-height:1.3;
+}
+.feat-desc{font-size:12px;color:var(--text3);line-height:1.55;margin-bottom:10px;}
+.feat-tag{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:9.5px;font-weight:500;
+  padding:3px 9px;border-radius:7px;letter-spacing:0.3px;
+}
+.cat-p .feat-tag{background:rgba(26,140,255,0.12);color:var(--blue);}
+.cat-s .feat-tag{background:rgba(255,203,71,0.12);color:var(--gold);}
+.cat-c .feat-tag{background:rgba(168,85,247,0.12);color:var(--purple);}
+
+.feat-arrow{
+  position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font-size:14px;color:var(--text3);
+  opacity:0;transition:all .2s;
+}
+.feat-card:hover .feat-arrow{opacity:1;right:14px;}
+
+/* ─── EXCLUSION BANNER ─── */
+.excl-wrap{
+  position:relative;z-index:1;
+  max-width:1100px;margin:0 auto 80px;padding:0 40px;
+}
+.excl-inner{
+  background:rgba(11,26,49,0.8);
+  border:1px solid rgba(255,203,71,0.2);
+  border-radius:16px;padding:20px 24px;
+  display:flex;align-items:flex-start;gap:16px;
+  backdrop-filter:blur(12px);
+}
+.excl-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+.excl-title{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px;font-family:var(--mono);}
+.excl-text{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.excl-text strong{color:var(--text2);}
+
+/* ─── DIVIDER ─── */
+.cat-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2) 30%,var(--border2) 70%,transparent);
+  margin:52px 0;
+}
+
+/* ─── FOOTER NAV ─── */
+.footer-note{
+  position:relative;z-index:1;
+  text-align:center;padding:32px;
+  font-size:12px;color:var(--text3);
+  border-top:1px solid var(--border);
+  font-family:var(--mono);
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .nav{padding:14px 20px;}
+  .hero,.main,.excl-wrap{padding-left:20px;padding-right:20px;}
+  .feat-grid,.feat-grid-3{grid-template-columns:1fr;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .stat:nth-child(2){border-right:none;}
+  .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--border);}
+}
+@media(max-width:600px){
+  .stats{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient bg -->
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb-left"></div>
+
+
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">
+    <div class="hero-dot"></div>
+    
+  </div>
+  <h1 class="hero-title">
+    Stop spending.<br>
+    <em>Start saving.</em><br>
+    Automatically.
+  </h1>
+  <p class="hero-sub">
+    Real‑time, <strong>zero‑effort financial intelligence</strong> that prevents overspending before it happens.
+    Explore all 10 unique features that define our competitive advantage.
+  </p>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <a href="alerts.html" class="hero-cta">
+      Start Prototype <span class="hero-cta-arrow">→</span>
+    </a>
+    <a href="user-manual.html" class="hero-manual-btn">
+      📖 User Manual
+    </a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-wrap">
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n">&lt;3s</div>
+      <div class="stat-l">SMS parse<br>speed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">10</div>
+      <div class="stat-l">Unique feature<br>pages</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">3</div>
+      <div class="stat-l">User<br>segments</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">73%</div>
+      <div class="stat-l">Abandonment<br>problem solved</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- Section intro -->
+  <div class="section-intro">
+    <h2 class="section-title">One app.<br><em>Every financial life.</em></h2>
+    <p class="section-sub">
+      Whether you're a student trying to <strong>save money in Sri Lanka</strong>,
+      an SME owner who refuses to pay for expensive software like QuickBooks,
+      or a corporate employee drowning in <strong>tax reimbursement paperwork</strong> —
+      SpendWise was built for all three.
+    </p>
+  </div>
+
+  <!-- ─── PERSONAL ─── -->
+  <div class="cat-section cat-p">
+    <div class="cat-header">
+      <div class="cat-line"></div>
+      <div class="cat-pill">
+        <span class="cat-pill-icon">👤</span>
+        <span class="cat-pill-label">Personal Finance</span>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+
+    <div class="cat-desc-row">
+      <div class="cat-desc-icon">📱</div>
+      <div class="cat-desc-text">
+        <h3>Zero-effort personal budgeting for Sri Lanka</h3>
+        <p>Automatically tracks every bank transaction via SMS, alerts you before you overspend at nearby stores, and builds a personalised AI dashboard — no manual input required. Directly addresses the <strong style="color:#fff;">73% app abandonment rate</strong> caused by friction.</p>
+      </div>
+    </div>
+
+    <div class="feat-grid">
+      <a href="alerts.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">01</div>
+          <div class="feat-icon-box">🔔</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Real-Time Pre-Purchase Alert</div>
+          <div class="feat-desc">GPS geofence triggers → competitor price check → push notification before you spend</div>
+          <span class="feat-tag">UC3 · CSF-01 · World First</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="dashboards.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">02</div>
+          <div class="feat-icon-box">🧠</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">AI Spending Persona Dashboard</div>
+          <div class="feat-desc">5-persona AI classification engine → fully personalised dashboard layout per user</div>
+          <span class="feat-tag">FR-02 · CSF-03 · 5 Personas</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="sms-tracking.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">03</div>
+          <div class="feat-icon-box">📡</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Bank SMS Auto-Parsing Feed</div>
+          <div class="feat-desc">NLP engine extracts merchant, amount, category from every bank SMS in under 3 seconds</div>
+          <span class="feat-tag">FR-01 · UC1 · NFR Performance</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="savings-map.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">04</div>
+          <div class="feat-icon-box">🗺️</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Geolocation Savings Map</div>
+          <div class="feat-desc">Live colour-coded map of nearby retailers showing LKR saving gap vs your usual store</div>
+          <span class="feat-tag">UC3 Extend · FR-03 · Geo Saver</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="voice-logging.html" class="feat-card" style="grid-column:1/-1;max-width:calc(50% - 6px);">
+        <div class="feat-left">
+          <div class="feat-num">05</div>
+          <div class="feat-icon-box">🎙️</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Voice Expense Logger</div>
+          <div class="feat-desc">Speak any expense → NLP auto-extracts all fields → one-tap confirm to feed</div>
+          <span class="feat-tag">FR-05 · UC2 · SL First</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="cat-divider"></div>
+
+  <!-- ─── SME ─── -->
+  <div class="cat-section cat-s">
+    <div class="cat-header">
+      <div class="cat-line"></div>
+      <div class="cat-pill">
+        <span class="cat-pill-icon">🏢</span>
+        <span class="cat-pill-label">SME Business</span>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+
+    <div class="cat-desc-row">
+      <div class="cat-desc-icon">📊</div>
+      <div class="cat-desc-text">
+        <h3>QuickBooks alternative at 10% of the cost</h3>
+        <p>OCR receipt scanning, one-click Inland Revenue-formatted reports, and subscription waste detection — everything a Sri Lankan SME needs for professional expense management at <strong style="color:#fff;">LKR 1,500/mo vs LKR 15,000+/mo</strong> for QuickBooks.</p>
+      </div>
+    </div>
+
+    <div class="feat-grid feat-grid-3">
+      <a href="receipt-scan.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">06</div>
+          <div class="feat-icon-box">📷</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">OCR Tax Receipt Scanner</div>
+          <div class="feat-desc">Photograph any receipt → OCR extracts VAT, merchant, and totals → encrypted digital vault</div>
+          <span class="feat-tag">FR-08 · UC4 · PDPA 2022</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="reports.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">07</div>
+          <div class="feat-icon-box">📊</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">SME One-Click Expense Reports</div>
+          <div class="feat-desc">Configure period and categories → one click generates IRD-formatted PDF or CSV</div>
+          <span class="feat-tag">FR-09 · CSF-02 · IRD Ready</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="subscriptions.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">09</div>
+          <div class="feat-icon-box">🔄</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Subscription Waste Detector</div>
+          <div class="feat-desc">Scans 90-day SMS history → flags unused recurring charges → 3-day renewal alerts</div>
+          <span class="feat-tag">FR-06 · SWOT W · SL Unique</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="cat-divider"></div>
+
+  <!-- ─── CORPORATE ─── -->
+  <div class="cat-section cat-c">
+    <div class="cat-header">
+      <div class="cat-line"></div>
+      <div class="cat-pill">
+        <span class="cat-pill-icon">💼</span>
+        <span class="cat-pill-label">Corporate &amp; B2B</span>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+
+    <div class="cat-desc-row">
+      <div class="cat-desc-icon">🏛️</div>
+      <div class="cat-desc-text">
+        <h3>Enterprise claims management and retail intelligence</h3>
+        <p>Corporate card expense tracking with automatic Inland Revenue claim generation, plus Sri Lanka's only source of anonymised cross-retailer consumer intelligence — SpendWise's unique <strong style="color:#fff;">B2B revenue stream</strong> from CW1 Porter Value Chain analysis.</p>
+      </div>
+    </div>
+
+    <div class="feat-grid">
+      <a href="reimbursements.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">08</div>
+          <div class="feat-icon-box">💳</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">Corporate Reimbursement Tracker</div>
+          <div class="feat-desc">Corporate card transactions auto-tracked via SMS → categorised → one-click Inland Revenue claim PDF submitted to HR</div>
+          <span class="feat-tag">FR-10 · UC5 · IRD Formatted</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+
+      <a href="retail-insights.html" class="feat-card">
+        <div class="feat-left">
+          <div class="feat-num">10</div>
+          <div class="feat-icon-box">📈</div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-title">B2B Retail Intelligence Dashboard</div>
+          <div class="feat-desc">Anonymised, aggregated consumer spending trends → retailer portal → targeted campaign analytics. PDPA 2022 compliant.</div>
+          <span class="feat-tag">FR-11 · B2B Revenue · PDPA 2022</span>
+        </div>
+        <div class="feat-arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- EXCLUSION NOTE -->
+<div class="excl-wrap">
+  <div class="excl-inner">
+    <span class="excl-icon">⚠️</span>
+    <div>
+      <div class="excl-title">Scope Note — Feature 08 Numbering</div>
+      <p class="excl-text">
+        <strong>Feature 08</strong> (Corporate Reimbursement Tracker) is listed under Corporate &amp; B2B rather than SME to match the use-case hierarchy defined in the requirements document. <strong>Feature 09</strong> (Subscription Waste Detector) appears under SME as it primarily targets business expense hygiene.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+
+</body>
+</html>

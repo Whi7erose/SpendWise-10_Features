@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise  Feature 06: OCR Tax Receipt Scanner | CW2 Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* ─── AMBIENT BG ─── */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,203,71,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,203,71,0.03) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);}
+.bg-glow{position:fixed;top:-15%;left:50%;transform:translateX(-50%);width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(255,203,71,0.07) 0%,rgba(0,232,122,0.03) 45%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb{position:fixed;bottom:5%;right:-8%;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.04),transparent 70%);pointer-events:none;z-index:0;}
+
+/* ─── NAV ─── */
+.proto-nav{display:flex;align-items:center;justify-content:space-between;padding:13px 40px;background:rgba(5,14,31,0.85);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.nav-left{display:flex;align-items:center;gap:16px;}
+.proto-logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.proto-logo span{color:var(--green);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 10px;border-radius:8px;color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;letter-spacing:0.3px;}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(255,203,71,0.12);color:var(--gold);border-color:rgba(255,203,71,0.28);}
+.proto-badge{font-family:var(--mono);font-size:10px;background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:4px 12px;border-radius:100px;font-weight:500;letter-spacing:0.5px;}
+
+/* ─── PAGE WRAP ─── */
+.page-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 40px 100px;}
+
+/* ─── HERO ─── */
+.page-hero{margin-bottom:56px;}
+.page-tag{display:inline-flex;align-items:center;gap:9px;background:rgba(255,203,71,0.08);border:1px solid rgba(255,203,71,0.22);color:var(--gold);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:blink 2.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+.page-h1{font-size:clamp(38px,5.5vw,62px);font-weight:800;color:#fff;line-height:1.07;letter-spacing:-2.5px;margin-bottom:18px;}
+.page-h1 em{font-style:normal;background:linear-gradient(135deg,var(--gold) 0%,#ff9a3c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;font-weight:700;}
+
+/* ─── STAT CHIPS ─── */
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 0;}
+.stat-chip{background:rgba(11,26,49,0.8);border:1px solid var(--border2);border-radius:14px;padding:16px 22px;text-align:center;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s;}
+.stat-chip:hover{border-color:rgba(255,203,71,0.35);transform:translateY(-2px);}
+.stat-chip .num{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;background:linear-gradient(135deg,var(--gold),#ff9a3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-chip .lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+
+/* ─── SEC LABEL ─── */
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--text3);}
+
+/* ─── MAIN GRID ─── */
+.main-grid{display:grid;grid-template-columns:340px 1fr;gap:40px;align-items:start;}
+
+/* ─── LEFT COLUMN ─── */
+.left-col{}
+
+/* ─── RECEIPT PANEL ─── */
+.receipt-panel{
+  background:rgba(11,26,49,0.9);border:1.5px solid var(--border2);
+  border-radius:22px;overflow:hidden;
+  backdrop-filter:blur(16px);
+  box-shadow:0 24px 64px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);
+  transition:border-color .4s;
+}
+.receipt-panel-header{
+  padding:15px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.02);
+}
+.receipt-header-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);flex-shrink:0;}
+.receipt-header-dot.scanning{animation:blink 0.7s ease infinite;}
+.receipt-header-title{font-size:13px;font-weight:700;color:#fff;}
+.receipt-header-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px;}
+
+.receipt-body{padding:22px;}
+
+/* ─── PHYSICAL RECEIPT ─── */
+.receipt-card{
+  background:#fff;border-radius:12px;
+  padding:20px 18px;
+  font-family:var(--mono);
+  box-shadow:0 12px 40px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.2);
+  position:relative;overflow:hidden;
+}
+.receipt-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:repeating-linear-gradient(to bottom,#e0e0e0 0px,#e0e0e0 4px,transparent 4px,transparent 8px);
+}
+.receipt-store-name{font-size:14px;font-weight:900;text-align:center;color:#111;letter-spacing:0.5px;margin-bottom:3px;}
+.receipt-store-sub{text-align:center;font-size:9px;color:#777;line-height:1.5;padding-bottom:10px;border-bottom:1px dashed #ccc;margin-bottom:10px;}
+.receipt-row{display:flex;justify-content:space-between;padding:3px 0;font-size:10.5px;color:#333;}
+.receipt-row.vat-row{color:#888;font-size:10px;}
+.receipt-row.total-row{font-weight:900;font-size:13px;color:#111;border-top:1.5px solid #333;margin-top:8px;padding-top:8px;}
+.ocr-hl{background:rgba(0,232,122,0.25);border-radius:2px;padding:1px 3px;position:relative;}
+
+/* Scan overlay */
+.scan-overlay{
+  position:absolute;inset:0;border-radius:12px;
+  background:rgba(0,232,122,0.04);
+  border:2px solid rgba(0,232,122,0.7);
+  display:none;
+}
+.scan-line{
+  position:absolute;left:8px;right:8px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),var(--green),transparent);
+  box-shadow:0 0 8px rgba(0,232,122,0.8);
+  animation:scanMove 1.4s ease-in-out infinite;
+}
+@keyframes scanMove{0%{top:10%}100%{top:88%}}
+.scan-corner{position:absolute;width:16px;height:16px;border-color:var(--green);border-style:solid;}
+.sc-tl{top:6px;left:6px;border-width:2px 0 0 2px;}
+.sc-tr{top:6px;right:6px;border-width:2px 2px 0 0;}
+.sc-bl{bottom:6px;left:6px;border-width:0 0 2px 2px;}
+.sc-br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
+
+/* ─── SCAN BUTTON ─── */
+.scan-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;background:var(--gold);color:var(--navy);
+  border:none;border-radius:12px;padding:13px;
+  font-family:var(--font);font-size:14px;font-weight:800;
+  cursor:pointer;transition:all .2s;margin-top:14px;
+  letter-spacing:-0.2px;
+}
+.scan-btn:hover{background:#e6b400;transform:translateY(-1px);}
+.scan-btn:active{transform:scale(0.98);}
+.scan-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* ─── RESULT CARD ─── */
+.result-card{
+  background:rgba(0,232,122,0.05);border:1.5px solid rgba(0,232,122,0.22);
+  border-radius:14px;padding:16px;margin-top:12px;
+  animation:slideIn .3s ease both;display:none;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.result-header{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:10px;color:var(--green);
+  letter-spacing:0.5px;margin-bottom:12px;
+}
+.result-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--border);
+}
+.result-row:last-of-type{border-none;padding-bottom:0;}
+.result-key{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.3px;}
+.result-val{font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+.result-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.result-btn{flex:1;padding:10px;border:none;border-radius:9px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.rb-feed{background:var(--green);color:var(--navy);}
+.rb-feed:hover{background:var(--green2);}
+.rb-claim{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.25);}
+.rb-claim:hover{background:rgba(168,85,247,0.18);}
+
+/* ─── RIGHT COLUMN ─── */
+.right-col{}
+
+/* ─── STEP FLOW ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.step-item-row{display:flex;gap:16px;align-items:flex-start;position:relative;}
+.step-item-row:not(:last-child)::after{content:'';position:absolute;left:17px;top:40px;width:2px;height:calc(100% + 4px);background:linear-gradient(to bottom,rgba(255,203,71,0.25),rgba(255,203,71,0.04));}
+.step-num-circle{width:36px;height:36px;border-radius:50%;background:rgba(255,203,71,0.08);border:1.5px solid rgba(255,203,71,0.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--gold);flex-shrink:0;transition:all .2s;}
+.step-item-row:hover .step-num-circle{background:rgba(255,203,71,0.16);border-color:rgba(255,203,71,0.5);}
+.step-body{padding-bottom:24px;flex:1;}
+.step-body h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-0.2px;}
+.step-body p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+.step-final .step-num-circle{background:rgba(0,232,122,0.08);border-color:rgba(0,232,122,0.3);color:var(--green);}
+
+/* ─── VAULT SECTION ─── */
+.vault-section{margin-top:28px;}
+.vault-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.vault-item{
+  background:rgba(11,26,49,0.8);border:1px solid var(--border);
+  border-radius:12px;padding:14px 10px;text-align:center;
+  cursor:pointer;transition:all .2s;
+}
+.vault-item:hover{border-color:rgba(255,203,71,0.3);transform:translateY(-2px);}
+.vi-icon{font-size:20px;margin-bottom:7px;}
+.vi-name{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;}
+.vi-date{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px;}
+.vi-amount{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--gold);margin-top:4px;}
+
+/* ─── INFO CARDS ─── */
+.info-card{background:rgba(11,26,49,0.8);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(10px);transition:all .25s;margin-top:14px;}
+.info-card:hover{border-color:rgba(255,203,71,0.2);transform:translateY(-2px);}
+.limit-box{background:rgba(255,203,71,0.04);border:1px solid rgba(255,203,71,0.18);border-radius:14px;padding:16px 20px;margin-top:14px;}
+.limit-box h5{font-family:var(--mono);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;}
+.limit-box p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+
+/* ─── PROTO NOTICE ─── */
+.proto-notice{display:flex;align-items:flex-start;gap:14px;background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.16);border-radius:14px;padding:16px 20px;margin-top:48px;}
+.proto-notice p{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.proto-notice p strong{color:var(--blue);}
+
+/* ─── PAGE NAV ─── */
+.page-nav{display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+.page-nav a{font-family:var(--mono);font-size:12px;color:var(--green);text-decoration:none;font-weight:500;transition:opacity .2s;}
+.page-nav a:hover{opacity:0.7;}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .65s ease both;}
+.anim-up-2{animation:fadeUp .65s ease 0.1s both;}
+.anim-up-3{animation:fadeUp .65s ease 0.2s both;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .page-wrap{padding:40px 20px 80px;}
+  .proto-pages{display:none;}
+  .main-grid{grid-template-columns:1fr;}
+  .vault-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:500px){
+  .stat-strip{gap:8px;}
+  .vault-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb"></div>
+
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero anim-up">
+   
+    <h1 class="page-h1">OCR Tax Receipt<br><em>Scanner &amp; Vault</em></h1>
+    <p class="page-sub">
+      Photograph any physical receipt  SpendWise's OCR engine extracts merchant, date, VAT amount, and line items <strong>automatically in under 3 seconds.</strong> All receipts stored in a searchable encrypted digital vault. Never lose a tax receipt again.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">&lt;3s</div><div class="lbl">Photo to data</div></div>
+      <div class="stat-chip"><div class="num">VAT</div><div class="lbl">Auto-extracted</div></div>
+      <div class="stat-chip"><div class="num">∞</div><div class="lbl">Receipts stored</div></div>
+      <div class="stat-chip"><div class="num">AES</div><div class="lbl">256-bit encrypted</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Scan demo -->
+    <div class="left-col anim-up-2">
+
+      <div class="receipt-panel" id="receipt-panel">
+        <div class="receipt-panel-header">
+          <div class="receipt-header-dot" id="header-dot"></div>
+          <div>
+            <div class="receipt-header-title">Receipt Scanner</div>
+            <div class="receipt-header-sub" id="header-sub">TAP BUTTON TO SIMULATE OCR SCAN</div>
+          </div>
+        </div>
+
+        <div class="receipt-body">
+          <!-- Physical receipt -->
+          <div style="position:relative;">
+            <div class="receipt-card" id="receipt-card">
+              <div class="receipt-store-name">KEELLS SUPER</div>
+              <div class="receipt-store-sub">
+                Nugegoda Branch · VAT Reg: 114-902-5431<br>
+                01 April 2026 · 14:23 · Cashier: K-04
+              </div>
+              <div class="receipt-row"><span>Milk 1L × 2</span><span>LKR 480.00</span></div>
+              <div class="receipt-row"><span>Bread Loaf</span><span>LKR 175.00</span></div>
+              <div class="receipt-row"><span>Fresh Vegetables</span><span>LKR 890.00</span></div>
+              <div class="receipt-row"><span>Chicken 500g</span><span>LKR 680.00</span></div>
+              <div class="receipt-row"><span>Rice 2kg</span><span>LKR 340.00</span></div>
+              <div class="receipt-row vat-row" style="margin-top:6px;padding-top:6px;border-top:1px dashed #ccc;">
+                <span>Sub-Total</span><span>LKR 2,565.00</span>
+              </div>
+              <div class="receipt-row vat-row">
+                <span class="ocr-hl">VAT (18%)</span>
+                <span class="ocr-hl">LKR 275.00</span>
+              </div>
+              <div class="receipt-row total-row">
+                <span class="ocr-hl">TOTAL</span>
+                <span class="ocr-hl">LKR 2,840.00</span>
+              </div>
+            </div>
+
+            <!-- Scan overlay -->
+            <div class="scan-overlay" id="scan-overlay">
+              <div class="scan-line"></div>
+              <div class="scan-corner sc-tl"></div>
+              <div class="scan-corner sc-tr"></div>
+              <div class="scan-corner sc-bl"></div>
+              <div class="scan-corner sc-br"></div>
+            </div>
+          </div>
+
+          <!-- Scan button -->
+          <button class="scan-btn" id="scan-btn" onclick="runScan()">
+            📷 Scan This Receipt
+          </button>
+
+          <!-- Result card -->
+          <div class="result-card" id="result-card">
+            <div class="result-header">
+              <span style="font-size:14px;">✓</span>
+              OCR EXTRACTION COMPLETE
+            </div>
+            <div class="result-row">
+              <span class="result-key">🏪 MERCHANT</span>
+              <span class="result-val">Keells Super</span>
+            </div>
+            <div class="result-row">
+              <span class="result-key">📅 DATE</span>
+              <span class="result-val">01 Apr 2026 · 14:23</span>
+            </div>
+            <div class="result-row">
+              <span class="result-key">💰 TOTAL</span>
+              <span class="result-val" style="color:var(--green);">LKR 2,840</span>
+            </div>
+            <div class="result-row">
+              <span class="result-key">🧾 VAT AMOUNT</span>
+              <span class="result-val" style="color:var(--gold);">LKR 275</span>
+            </div>
+            <div class="result-row">
+              <span class="result-key">🏷️ CATEGORY</span>
+              <span class="result-val">Groceries</span>
+            </div>
+            <div class="result-row" style="border:none;padding-bottom:0;">
+              <span class="result-key">🔒 STORED</span>
+              <span class="result-val" style="color:var(--green);font-size:11px;">Encrypted vault ✓</span>
+            </div>
+            <div class="result-actions">
+              <button class="result-btn rb-feed" onclick="alert('Final version: adds to expense feed')">Add to Feed</button>
+              <button class="result-btn rb-claim" onclick="alert('Final version: adds to reimbursement claim')">Add to Claim</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div><!-- /left -->
+
+    <!-- RIGHT: Steps + vault + traceability -->
+    <div class="right-col anim-up-3">
+
+      <div class="sec-label">How OCR Scanning Works</div>
+      <div class="step-flow">
+        <div class="step-item-row">
+          <div class="step-num-circle">1</div>
+          <div class="step-body">
+            <h4>Camera Capture or Email Forward</h4>
+            <p>User photographs a receipt in-app, or forwards a supplier invoice email to their personal SpendWise inbox address. Both routes feed the exact same OCR pipeline.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">2</div>
+          <div class="step-body">
+            <h4>OCR Text Extraction</h4>
+            <p>Google Cloud Vision API processes the image  handling skewed, rotated, or crumpled receipts. Optical Character Recognition extracts all text and reconstructs the tabular structure of itemised bills.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">3</div>
+          <div class="step-body">
+            <h4>Field Parsing  Merchant, Total, VAT</h4>
+            <p>NLP post-processor identifies: store name (top of receipt), date, line items (tabular rows), sub-total, VAT amount, grand total, and VAT registration number if present.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">4</div>
+          <div class="step-body">
+            <h4>Encrypted Digital Vault</h4>
+            <p>Original image + extracted data stored in AES-256 encrypted cloud vault. Fully searchable by merchant, date range, amount, and VAT status. Tagged for reimbursement claims or year-end tax filing.</p>
+          </div>
+        </div>
+        <div class="step-item-row step-final">
+          <div class="step-num-circle">5</div>
+          <div class="step-body" style="padding-bottom:0;">
+            <h4>One-Click IRD Export</h4>
+            <p>All VAT receipts export as a single PDF formatted for Sri Lanka's Inland Revenue Department  making year-end tax filing straightforward for any SME owner.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Digital vault -->
+      <div class="vault-section">
+        <div class="sec-label">Digital Receipt Vault  Sample</div>
+        <div class="vault-grid">
+          <div class="vault-item">
+            <div class="vi-icon">🧾</div>
+            <div class="vi-name">Keells Super</div>
+            <div class="vi-date">01 Apr 2026</div>
+            <div class="vi-amount">LKR 2,840</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">🍕</div>
+            <div class="vi-name">Pizza Hut</div>
+            <div class="vi-date">29 Mar 2026</div>
+            <div class="vi-amount">LKR 3,200</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">💊</div>
+            <div class="vi-name">Nawaloka Phcy</div>
+            <div class="vi-date">28 Mar 2026</div>
+            <div class="vi-amount">LKR 2,240</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">⛽</div>
+            <div class="vi-name">Lanka IOC</div>
+            <div class="vi-date">27 Mar 2026</div>
+            <div class="vi-amount">LKR 4,500</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">🏢</div>
+            <div class="vi-name">Arpico Super</div>
+            <div class="vi-date">25 Mar 2026</div>
+            <div class="vi-amount">LKR 3,150</div>
+          </div>
+          <div class="vault-item">
+            <div class="vi-icon">🖨️</div>
+            <div class="vi-name">Supplier Inv.</div>
+            <div class="vi-date">20 Mar 2026</div>
+            <div class="vi-amount">LKR 28,000</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="sec-label">Traceability</div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.65;margin-top:4px;">Implements <strong style="color:#fff;">FR-08</strong> (OCR receipt scanning) and <strong style="color:#fff;">UC4</strong>. Addresses the <strong style="color:#fff;">PESTEL Legal factor</strong> from CW1  PDPA 2022 compliance for receipt data storage. Serves the <strong style="color:#fff;">SME segment</strong> identified as the highest-value B2C segment in target market analysis.</p>
+      </div>
+
+      <div class="limit-box">
+        <h5>⚠ Prototype Limitation</h5>
+        <p>The scan animation simulates OCR processing. Full implementation requires Google Cloud Vision API or self-hosted Tesseract, an image pre-processing pipeline (deskew, contrast enhancement), and AES-256 encrypted cloud storage (AWS S3). The vault grid shows static sample entries  final version is fully searchable and filterable.</p>
+      </div>
+
+    </div><!-- /right -->
+  </div><!-- /main-grid -->
+
+  <!-- PROTO NOTICE -->
+  <div class="proto-notice">
+    <span style="font-size:15px;flex-shrink:0;">ℹ️</span>
+    <p><strong>Prototype Note:</strong> Clicking "Scan This Receipt" shows the scanning animation and extracted fields, demonstrating the intended UX flow. In the final product this requires a cloud OCR API, image processing pipeline, and encrypted storage. The digital vault grid represents the vault interface design with sample stored receipts.</p>
+  </div>
+<div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="voice-logging.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">← Page 05: Voice Expense Logger</a>
+    <a href="reports.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">Page 07: Expense Reports →</a>
+  </div>
+ 
+
+</div>
+
+<script>
+let scanning = false;
+
+function runScan() {
+  if (scanning) return;
+  scanning = true;
+
+  const btn     = document.getElementById('scan-btn');
+  const overlay = document.getElementById('scan-overlay');
+  const result  = document.getElementById('result-card');
+  const dot     = document.getElementById('header-dot');
+  const sub     = document.getElementById('header-sub');
+  const panel   = document.getElementById('receipt-panel');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Scanning…';
+  overlay.style.display = 'block';
+  result.style.display  = 'none';
+  dot.classList.add('scanning');
+  sub.textContent = 'OCR PROCESSING IN PROGRESS';
+  panel.style.borderColor = 'rgba(255,203,71,0.4)';
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    dot.classList.remove('scanning');
+    sub.textContent = '✓ EXTRACTION COMPLETE  REVIEW FIELDS';
+    panel.style.borderColor = 'rgba(0,232,122,0.35)';
+    result.style.display = 'block';
+    btn.textContent = '🔁 Scan Again';
+    btn.style.background = 'rgba(255,255,255,0.08)';
+    btn.style.color = 'var(--text2)';
+    btn.style.border = '1px solid var(--border2)';
+    btn.disabled = false;
+    btn.onclick = resetScan;
+    scanning = false;
+  }, 2400);
+}
+
+function resetScan() {
+  const btn    = document.getElementById('scan-btn');
+  const result = document.getElementById('result-card');
+  const sub    = document.getElementById('header-sub');
+  const panel  = document.getElementById('receipt-panel');
+
+  result.style.display = 'none';
+  sub.textContent = 'TAP BUTTON TO SIMULATE OCR SCAN';
+  panel.style.borderColor = '';
+  btn.textContent = '📷 Scan This Receipt';
+  btn.style.background = '';
+  btn.style.color = '';
+  btn.style.border = '';
+  btn.onclick = runScan;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise  Feature 05: Voice Expense Logger | CW2 Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+/* ─── AMBIENT BG ─── */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(168,85,247,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,0.04) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);}
+.bg-glow{position:fixed;top:-15%;left:50%;transform:translateX(-50%);width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.08) 0%,rgba(0,232,122,0.03) 45%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb{position:fixed;bottom:5%;right:-8%;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(0,232,122,0.05),transparent 70%);pointer-events:none;z-index:0;}
+
+/* ─── NAV ─── */
+.proto-nav{display:flex;align-items:center;justify-content:space-between;padding:13px 40px;background:rgba(5,14,31,0.85);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.nav-left{display:flex;align-items:center;gap:16px;}
+.proto-logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.proto-logo span{color:var(--green);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 10px;border-radius:8px;color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;letter-spacing:0.3px;}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(168,85,247,0.12);color:var(--purple);border-color:rgba(168,85,247,0.25);}
+.proto-badge{font-family:var(--mono);font-size:10px;background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:4px 12px;border-radius:100px;font-weight:500;letter-spacing:0.5px;}
+
+/* ─── PAGE WRAP ─── */
+.page-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 40px 100px;}
+
+/* ─── HERO ─── */
+.page-hero{margin-bottom:56px;}
+.page-tag{display:inline-flex;align-items:center;gap:9px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.22);color:var(--purple);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);box-shadow:0 0 8px var(--purple);animation:blink 2.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+.page-h1{font-size:clamp(38px,5.5vw,62px);font-weight:800;color:#fff;line-height:1.07;letter-spacing:-2.5px;margin-bottom:18px;}
+.page-h1 em{font-style:normal;background:linear-gradient(135deg,var(--purple) 0%,#e879f9 60%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;font-weight:700;}
+
+/* ─── STAT CHIPS ─── */
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 0;}
+.stat-chip{background:rgba(11,26,49,0.8);border:1px solid var(--border2);border-radius:14px;padding:16px 22px;text-align:center;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s;}
+.stat-chip:hover{border-color:rgba(168,85,247,0.35);transform:translateY(-2px);}
+.stat-chip .num{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;background:linear-gradient(135deg,var(--purple),#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-chip .lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+
+/* ─── SEC LABEL ─── */
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--text3);}
+
+/* ─── MAIN GRID ─── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+
+/* ─── VOICE PANEL ─── */
+.voice-panel{
+  background:rgba(11,26,49,0.9);border:1.5px solid var(--border2);
+  border-radius:24px;overflow:hidden;
+  backdrop-filter:blur(16px);
+  box-shadow:0 24px 64px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);
+  transition:border-color .4s;
+}
+.voice-panel.active-panel{border-color:rgba(168,85,247,0.4);}
+
+.voice-panel-header{
+  padding:16px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.02);
+}
+.voice-header-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);box-shadow:0 0 10px var(--purple);flex-shrink:0;}
+.voice-header-dot.pulse{animation:blink 1.2s ease infinite;}
+.voice-header-title{font-size:13px;font-weight:700;color:#fff;}
+.voice-header-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px;}
+
+/* ─── MIC BUTTON ─── */
+.mic-area{
+  display:flex;flex-direction:column;align-items:center;
+  padding:36px 28px 28px;
+}
+.mic-outer{
+  width:110px;height:110px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;cursor:pointer;margin-bottom:20px;
+}
+.mic-ring-1,.mic-ring-2{
+  position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(168,85,247,0.2);
+  transition:all .4s;
+}
+.mic-ring-2{inset:8px;border-color:rgba(168,85,247,0.15);}
+.mic-core{
+  width:72px;height:72px;border-radius:50%;
+  background:rgba(168,85,247,0.1);border:1.5px solid rgba(168,85,247,0.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  transition:all .3s;
+  box-shadow:0 8px 28px rgba(168,85,247,0.15);
+  position:relative;z-index:1;
+}
+.mic-outer:hover .mic-core{background:rgba(168,85,247,0.18);box-shadow:0 8px 36px rgba(168,85,247,0.28);}
+.mic-outer.listening .mic-ring-1{animation:rippleOut 1.4s ease-out infinite;}
+.mic-outer.listening .mic-ring-2{animation:rippleOut 1.4s ease-out 0.7s infinite;}
+.mic-outer.listening .mic-core{background:rgba(168,85,247,0.25);border-color:var(--purple);box-shadow:0 0 0 6px rgba(168,85,247,0.15),0 8px 36px rgba(168,85,247,0.3);}
+@keyframes rippleOut{0%{transform:scale(1);opacity:0.5}100%{transform:scale(1.6);opacity:0}}
+
+.voice-status-text{
+  font-size:13px;font-weight:600;color:var(--text3);margin-bottom:16px;
+  font-family:var(--mono);letter-spacing:0.3px;text-align:center;
+  min-height:20px;transition:color .3s;
+}
+.voice-status-text.active{color:var(--purple);}
+.voice-status-text.success{color:var(--green);}
+
+/* ─── WAVEFORM ─── */
+.wave-wrap{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  height:40px;margin-bottom:20px;padding:0 20px;
+}
+.wave-bar{
+  width:3px;border-radius:2px;
+  background:var(--purple);opacity:0.6;
+  transition:height .1s ease;
+  min-height:4px;
+}
+
+/* ─── TRANSCRIPT ─── */
+.transcript-box{
+  width:100%;
+  background:rgba(5,14,31,0.7);border:1px solid var(--border2);
+  border-radius:13px;padding:14px 16px;
+  min-height:56px;
+  font-family:var(--mono);font-size:12px;color:var(--text2);
+  line-height:1.7;font-style:italic;
+  margin-bottom:0;
+  transition:border-color .3s;
+}
+.transcript-box.has-text{border-color:rgba(168,85,247,0.25);color:var(--text);}
+
+/* ─── PARSED RESULT ─── */
+.parsed-result{
+  width:100%;
+  background:rgba(168,85,247,0.05);
+  border:1px solid rgba(168,85,247,0.2);
+  border-radius:13px;padding:16px;
+  margin-top:12px;
+  animation:slideIn .3s ease both;
+  display:none;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.parsed-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.parsed-row:last-of-type{border:none;padding-bottom:0;}
+.parsed-key{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.5px;}
+.parsed-val{font-size:13px;font-weight:700;color:#fff;text-align:right;letter-spacing:-0.2px;}
+
+.voice-confirm{display:flex;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.btn-confirm{flex:1;padding:11px;border:none;border-radius:10px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-yes{background:var(--green);color:var(--navy);}
+.btn-yes:hover{background:var(--green2);transform:translateY(-1px);}
+.btn-no{background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:10px;}
+.btn-no:hover{border-color:var(--border2);color:var(--text);}
+
+/* ─── PHRASE CHIPS ─── */
+.phrases-section{margin-top:20px;padding:0 22px 22px;}
+.phrase-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.phrase-chip{
+  background:rgba(5,14,31,0.7);border:1px solid var(--border);
+  border-radius:11px;padding:10px 12px;
+  font-size:11.5px;color:var(--text2);cursor:pointer;
+  transition:all .2s;line-height:1.45;
+  font-family:var(--font);
+}
+.phrase-chip:hover{border-color:rgba(168,85,247,0.35);color:var(--text);background:rgba(168,85,247,0.05);}
+.phrase-chip:active{transform:scale(0.97);}
+
+/* ─── RIGHT COLUMN ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;margin-top:4px;}
+.step-item-row{display:flex;gap:16px;align-items:flex-start;position:relative;}
+.step-item-row:not(:last-child)::after{content:'';position:absolute;left:17px;top:40px;width:2px;height:calc(100% + 4px);background:linear-gradient(to bottom,rgba(168,85,247,0.25),rgba(168,85,247,0.04));}
+.step-num-circle{width:36px;height:36px;border-radius:50%;background:rgba(168,85,247,0.08);border:1.5px solid rgba(168,85,247,0.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--purple);flex-shrink:0;transition:all .2s;}
+.step-item-row:hover .step-num-circle{background:rgba(168,85,247,0.16);border-color:rgba(168,85,247,0.5);}
+.step-body{padding-bottom:24px;flex:1;}
+.step-body h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-0.2px;}
+.step-body p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+.step-final .step-num-circle{background:rgba(0,232,122,0.08);border-color:rgba(0,232,122,0.3);color:var(--green);}
+
+/* ─── VS CARDS ─── */
+.vs-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+.vs-card{border-radius:14px;padding:16px 18px;}
+.vs-us{background:rgba(0,232,122,0.04);border:1px solid rgba(0,232,122,0.16);}
+.vs-them{background:rgba(255,77,109,0.04);border:1px solid rgba(255,77,109,0.14);}
+.vs-card-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;}
+.vs-us .vs-card-label{color:var(--green);}
+.vs-them .vs-card-label{color:var(--red);}
+.vs-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.vs-list li{font-size:12.5px;color:var(--text2);display:flex;align-items:flex-start;gap:7px;line-height:1.4;}
+.vs-us .vs-list li::before{content:"✓";color:var(--green);font-weight:800;flex-shrink:0;font-size:11px;}
+.vs-them .vs-list li::before{content:"✗";color:var(--red);font-weight:800;flex-shrink:0;font-size:11px;}
+
+/* ─── CARDS ─── */
+.info-card{background:rgba(11,26,49,0.8);border:1px solid var(--border);border-radius:16px;padding:20px;backdrop-filter:blur(10px);transition:all .25s;margin-top:14px;}
+.info-card:hover{border-color:rgba(168,85,247,0.2);transform:translateY(-2px);}
+.limit-box{background:rgba(255,203,71,0.04);border:1px solid rgba(255,203,71,0.18);border-radius:14px;padding:16px 20px;margin-top:14px;}
+.limit-box h5{font-family:var(--mono);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;}
+.limit-box p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+
+/* ─── PROTO NOTICE ─── */
+.proto-notice{display:flex;align-items:flex-start;gap:14px;background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.16);border-radius:14px;padding:16px 20px;margin-top:48px;}
+.proto-notice p{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.proto-notice p strong{color:var(--blue);}
+
+/* ─── PAGE NAV ─── */
+.page-nav{display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+.page-nav a{font-family:var(--mono);font-size:12px;color:var(--green);text-decoration:none;font-weight:500;transition:opacity .2s;}
+.page-nav a:hover{opacity:0.7;}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .65s ease both;}
+.anim-up-2{animation:fadeUp .65s ease 0.1s both;}
+.anim-up-3{animation:fadeUp .65s ease 0.2s both;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .page-wrap{padding:40px 20px 80px;}
+  .proto-pages{display:none;}
+  .main-grid{grid-template-columns:1fr;}
+  .vs-row{grid-template-columns:1fr;}
+  .phrase-grid{grid-template-columns:1fr;}
+}
+@media(max-width:500px){
+  .stat-strip{gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb"></div>
+
+
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero anim-up">
+    
+    <h1 class="page-h1">Voice Expense<br><em>Logger</em></h1>
+    <p class="page-sub">
+      The fastest way to log a cash expense in Sri Lanka. Tap the mic, say what you spent 
+      SpendWise extracts every field automatically. Works in <strong>English</strong> with
+      <strong>Sinhala &amp; Tamil</strong> support planned for the final version.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">&lt;2s</div><div class="lbl">Voice to entry</div></div>
+      <div class="stat-chip"><div class="num">1 tap</div><div class="lbl">To start logging</div></div>
+      <div class="stat-chip"><div class="num">0</div><div class="lbl">SL competitors with voice</div></div>
+      <div class="stat-chip"><div class="num">3 lang</div><div class="lbl">EN / SI / TA planned</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Voice demo -->
+    <div class="anim-up-2">
+
+      <div class="voice-panel" id="voice-panel">
+        <!-- Header -->
+        <div class="voice-panel-header">
+          <div class="voice-header-dot" id="header-dot"></div>
+          <div>
+            <div class="voice-header-title">Voice Expense Logger</div>
+            <div class="voice-header-sub" id="header-sub">TAP MIC OR SELECT A SAMPLE PHRASE</div>
+          </div>
+        </div>
+
+        <!-- Mic + waveform + transcript -->
+        <div class="mic-area">
+          <div class="mic-outer" id="mic" onclick="startListening()">
+            <div class="mic-ring-1"></div>
+            <div class="mic-ring-2"></div>
+            <div class="mic-core">🎙️</div>
+          </div>
+
+          <div class="voice-status-text" id="status">Tap to activate microphone</div>
+
+          <div class="wave-wrap" id="wave-wrap">
+            <div class="wave-bar" id="b1" style="height:6px;"></div>
+            <div class="wave-bar" id="b2" style="height:14px;"></div>
+            <div class="wave-bar" id="b3" style="height:22px;"></div>
+            <div class="wave-bar" id="b4" style="height:10px;"></div>
+            <div class="wave-bar" id="b5" style="height:30px;"></div>
+            <div class="wave-bar" id="b6" style="height:18px;"></div>
+            <div class="wave-bar" id="b7" style="height:8px;"></div>
+            <div class="wave-bar" id="b8" style="height:24px;"></div>
+            <div class="wave-bar" id="b9" style="height:12px;"></div>
+          </div>
+
+          <div class="transcript-box" id="transcript">Your speech will appear here as you speak...</div>
+
+          <div class="parsed-result" id="parsed">
+            <div class="parsed-row">
+              <span class="parsed-key">🏪 MERCHANT</span>
+              <span class="parsed-val" id="p-merchant"></span>
+            </div>
+            <div class="parsed-row">
+              <span class="parsed-key">💰 AMOUNT</span>
+              <span class="parsed-val" id="p-amount"></span>
+            </div>
+            <div class="parsed-row">
+              <span class="parsed-key">🏷️ CATEGORY</span>
+              <span class="parsed-val" id="p-cat"></span>
+            </div>
+            <div class="parsed-row">
+              <span class="parsed-key">🕐 DATE / TIME</span>
+              <span class="parsed-val" id="p-time"></span>
+            </div>
+            <div class="voice-confirm">
+              <button class="btn-confirm btn-yes" onclick="confirmEntry()">✓ Add to Feed</button>
+              <button class="btn-confirm btn-no" onclick="resetDemo()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phrase chips -->
+        <div class="phrases-section">
+          <div class="sec-label">Sample Phrases  Click to Simulate</div>
+          <div class="phrase-grid">
+            <div class="phrase-chip" onclick="simulate('Paid 480 rupees for coffee at Barista','Barista Coffee','LKR 480','Dining & Cafe')">☕ &quot;Paid 480 rupees for coffee at Barista&quot;</div>
+            <div class="phrase-chip" onclick="simulate('Lunch at Laughing Lion 1200 rupees','Laughing Lion','LKR 1,200','Dining & Cafe')">🍛 &quot;Lunch at Laughing Lion, 1200 rupees&quot;</div>
+            <div class="phrase-chip" onclick="simulate('350 for tuk from Nugegoda to Colombo','PickMe / Tuk-Tuk','LKR 350','Transport')">🛺 &quot;350 for tuk from Nugegoda&quot;</div>
+            <div class="phrase-chip" onclick="simulate('Paid 2500 at Nawaloka pharmacy','Nawaloka Pharmacy','LKR 2,500','Health & Medical')">💊 &quot;Paid 2500 at Nawaloka pharmacy&quot;</div>
+            <div class="phrase-chip" onclick="simulate('Bought petrol 5000 at Lanka IOC','Lanka IOC','LKR 5,000','Fuel')">⛽ &quot;Bought petrol 5000 at Lanka IOC&quot;</div>
+            <div class="phrase-chip" onclick="simulate('Paid cleaner 3000 this morning','Household Help','LKR 3,000','Household')">🧹 &quot;Paid cleaner 3000 this morning&quot;</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /left -->
+
+    <!-- RIGHT: Steps + VS + info -->
+    <div class="anim-up-3">
+
+      <div class="sec-label">How Voice Logging Works</div>
+      <div class="step-flow">
+        <div class="step-item-row">
+          <div class="step-num-circle">1</div>
+          <div class="step-body">
+            <h4>One-Tap Mic Activation</h4>
+            <p>User taps the mic button on the home screen or the floating widget. Designed for on-the-go capture  accessible from any screen, even while driving or shopping.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">2</div>
+          <div class="step-body">
+            <h4>Speech-to-Text Transcription</h4>
+            <p>Google Speech API (Android) or Apple Speech (iOS) converts voice to text. The prototype uses the Web Speech API; the final version uses a model fine-tuned for Sri Lankan English accents.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">3</div>
+          <div class="step-body">
+            <h4>NLP Entity Extraction</h4>
+            <p>Same NLP engine as the SMS parser extracts amount, merchant name, and category. Time defaults to "now" unless the user says "yesterday" or a specific day name.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">4</div>
+          <div class="step-body">
+            <h4>One-Tap Confirmation</h4>
+            <p>Parsed result is shown in a confirm card. Any field can be tapped to edit. A single tap confirms and adds to the feed  or one tap discards to re-record.</p>
+          </div>
+        </div>
+        <div class="step-item-row step-final">
+          <div class="step-num-circle">5</div>
+          <div class="step-body" style="padding-bottom:0;">
+            <h4>Added to Expense Feed</h4>
+            <p>Voice entries join the same feed as SMS-parsed transactions  treated identically in budget calculations. Tagged with a 🎙️ icon for transparency, but fully equivalent in reports.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;">
+        <div class="sec-label">SpendWise vs All Sri Lankan Competitors</div>
+        <div class="vs-row">
+          <div class="vs-card vs-us">
+            <div class="vs-card-label">SpendWise</div>
+            <ul class="vs-list">
+              <li>Voice-to-entry in &lt;2 seconds</li>
+              <li>NLP extracts all fields auto</li>
+              <li>One-tap confirm flow</li>
+              <li>Sinhala/Tamil planned</li>
+            </ul>
+          </div>
+          <div class="vs-card vs-them">
+            <div class="vs-card-label">All SL Competitors</div>
+            <ul class="vs-list">
+              <li>Manual text entry only</li>
+              <li>Multiple form fields to fill</li>
+              <li>No voice support at all</li>
+              <li>High friction = users quit</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="sec-label">Traceability</div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.65;margin-top:4px;">Implements FR-05 (voice‑based expense entry) and supports UC2 within the expense capture workflow. It is highlighted in the Competitive Advantage Summary as a key differentiator, as competing solutions such as Mint, FREMI, and Toshl provide no voice input support in their Sri Lanka configurations.</p>
+      </div>
+
+      <div class="limit-box">
+        <h5>⚠ Prototype Limitation</h5>
+        <p>The demo simulates voice by animating a preset transcript when a phrase chip is clicked. Full implementation requires the Google/Apple STT SDK, a fine-tuned Sri Lankan English accent model, and the NLP extraction pipeline. Sinhala/Tamil requires a separate STT model trained on local speech data.</p>
+      </div>
+
+    </div><!-- /right -->
+  </div><!-- /main-grid -->
+
+  <!-- PROTO NOTICE -->
+  <div class="proto-notice">
+    <span style="font-size:15px;flex-shrink:0;">ℹ️</span>
+    <p><strong>Prototype Note:</strong> The voice demo simulates the full interaction flow using pre-set sample phrases. In the final mobile app, real speech recognition fires on mic tap. The parsing result, confirmation screen, and feed-addition logic shown here represent the complete intended UX. Sinhala and Tamil language support requires a dedicated speech model not available at prototype stage.</p>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="savings-map.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">← Page 04: Savings Map</a>
+    <a href="receipt-scan.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">Page 06: Receipt Scanner (OCR) →</a>
+  </div>
+
+<script>
+let waveTimer = null;
+
+function animateWave(on) {
+  if (!on) {
+    clearInterval(waveTimer);
+    for (let i = 1; i <= 9; i++) {
+      const b = document.getElementById('b' + i);
+      if (b) b.style.height = '6px';
+    }
+    return;
+  }
+  waveTimer = setInterval(() => {
+    for (let i = 1; i <= 9; i++) {
+      const b = document.getElementById('b' + i);
+      if (b) b.style.height = (Math.random() * 30 + 4) + 'px';
+    }
+  }, 110);
+}
+
+function setStatus(text, cls = '') {
+  const el = document.getElementById('status');
+  el.textContent = text;
+  el.className = 'voice-status-text ' + cls;
+}
+
+function setHeader(text) {
+  document.getElementById('header-sub').textContent = text;
+}
+
+function startListening() {
+  const mic = document.getElementById('mic');
+  const dot = document.getElementById('header-dot');
+  mic.classList.add('listening');
+  dot.classList.add('pulse');
+  document.getElementById('parsed').style.display = 'none';
+  document.getElementById('transcript').textContent = 'Listening...';
+  document.getElementById('transcript').classList.remove('has-text');
+  document.getElementById('voice-panel').classList.add('active-panel');
+  setStatus('Listening… speak now', 'active');
+  setHeader('RECORDING IN PROGRESS');
+  animateWave(true);
+
+  setTimeout(() => {
+    animateWave(false);
+    mic.classList.remove('listening');
+    dot.classList.remove('pulse');
+    setStatus('Select a phrase below to see the NLP result', '');
+    setHeader('TAP MIC OR SELECT A SAMPLE PHRASE');
+    document.getElementById('transcript').textContent = '(In the final app your voice is transcribed here)';
+    document.getElementById('voice-panel').classList.remove('active-panel');
+  }, 3000);
+}
+
+function simulate(phrase, merchant, amount, cat) {
+  const mic = document.getElementById('mic');
+  const dot = document.getElementById('header-dot');
+  const transcriptEl = document.getElementById('transcript');
+
+  mic.classList.add('listening');
+  dot.classList.add('pulse');
+  document.getElementById('parsed').style.display = 'none';
+  transcriptEl.textContent = '';
+  transcriptEl.classList.remove('has-text');
+  document.getElementById('voice-panel').classList.add('active-panel');
+  setStatus('Listening…', 'active');
+  setHeader('TRANSCRIBING SPEECH');
+  animateWave(true);
+
+  let i = 0;
+  const typing = setInterval(() => {
+    transcriptEl.textContent = phrase.substring(0, i++);
+    transcriptEl.classList.add('has-text');
+    if (i > phrase.length) {
+      clearInterval(typing);
+      animateWave(false);
+      mic.classList.remove('listening');
+      dot.classList.remove('pulse');
+
+      setStatus('✓ Parsed  tap to confirm', 'success');
+      setHeader('REVIEW EXTRACTED FIELDS');
+
+      document.getElementById('p-merchant').textContent = merchant;
+      document.getElementById('p-amount').textContent = amount;
+      document.getElementById('p-cat').textContent = cat;
+      document.getElementById('p-time').textContent = 'Now · ' + new Date().toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' });
+
+      const parsed = document.getElementById('parsed');
+      parsed.style.display = 'block';
+    }
+  }, 38);
+}
+
+function confirmEntry() {
+  const mic = document.getElementById('mic');
+  document.getElementById('parsed').style.display = 'none';
+  document.getElementById('transcript').textContent = '✓ Entry added to your expense feed.';
+  document.getElementById('transcript').classList.add('has-text');
+  setStatus('✓ Saved to expense feed!', 'success');
+  setHeader('ENTRY CONFIRMED');
+  document.getElementById('voice-panel').classList.remove('active-panel');
+  setTimeout(resetDemo, 2200);
+}
+
+function resetDemo() {
+  document.getElementById('parsed').style.display = 'none';
+  document.getElementById('transcript').textContent = 'Your speech will appear here as you speak...';
+  document.getElementById('transcript').classList.remove('has-text');
+  document.getElementById('mic').classList.remove('listening');
+  document.getElementById('header-dot').classList.remove('pulse');
+  document.getElementById('voice-panel').classList.remove('active-panel');
+  setStatus('Tap to activate microphone', '');
+  setHeader('TAP MIC OR SELECT A SAMPLE PHRASE');
+  animateWave(false);
+}
+</script>
+</body>
+</html>

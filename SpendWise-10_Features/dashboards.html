@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SpendWise — Feature 02: AI Spending Persona Dashboard | CW2 Prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#050e1f;--navy2:#0b1a31;--navy3:#112040;
+  --green:#00e87a;--green2:#00c465;
+  --blue:#1a8cff;--gold:#ffcb47;--purple:#a855f7;--red:#ff4d6d;
+  --text:#e8f0fe;--text2:#8ca5c8;--text3:#5a7a9e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --card:rgba(255,255,255,0.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{background:var(--navy);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6;overflow-x:hidden;}
+
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(168,85,247,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,0.03) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,black,transparent);}
+.bg-glow{position:fixed;top:-15%;left:50%;transform:translateX(-50%);width:900px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.07) 0%,rgba(26,140,255,0.04) 45%,transparent 70%);pointer-events:none;z-index:0;}
+.bg-orb{position:fixed;bottom:0;right:-10%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,232,122,0.04),transparent 70%);pointer-events:none;z-index:0;}
+
+/* NAV */
+.proto-nav{display:flex;align-items:center;justify-content:space-between;padding:13px 40px;background:rgba(5,14,31,0.85);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.nav-left{display:flex;align-items:center;gap:16px;}
+.proto-logo{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.proto-logo span{color:var(--green);}
+.nav-sep{width:1px;height:20px;background:var(--border2);}
+.proto-pages{display:flex;gap:3px;flex-wrap:wrap;}
+.proto-pages a{font-family:var(--mono);font-size:10px;font-weight:500;padding:5px 10px;border-radius:8px;color:var(--text3);text-decoration:none;transition:all .2s;border:1px solid transparent;letter-spacing:0.3px;}
+.proto-pages a:hover{color:var(--text);border-color:var(--border);}
+.proto-pages a.active{background:rgba(168,85,247,0.12);color:var(--purple);border-color:rgba(168,85,247,0.25);}
+.proto-badge{font-family:var(--mono);font-size:10px;background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);padding:4px 12px;border-radius:100px;font-weight:500;letter-spacing:0.5px;}
+
+/* PAGE WRAP */
+.page-wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 40px 100px;}
+
+/* HERO */
+.page-hero{margin-bottom:56px;}
+.page-tag{display:inline-flex;align-items:center;gap:9px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.22);color:var(--purple);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);box-shadow:0 0 8px var(--purple);animation:blink 2.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.8)}}
+.page-h1{font-size:clamp(38px,5.5vw,62px);font-weight:800;color:#fff;line-height:1.07;letter-spacing:-2.5px;margin-bottom:18px;}
+.page-h1 em{font-style:normal;background:linear-gradient(135deg,var(--purple) 0%,#e879f9 60%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-sub{font-size:17px;color:var(--text2);max-width:640px;line-height:1.75;}
+.page-sub strong{color:#fff;font-weight:700;}
+
+/* STAT CHIPS */
+.stat-strip{display:flex;gap:12px;flex-wrap:wrap;margin:32px 0 0;}
+.stat-chip{background:rgba(11,26,49,0.8);border:1px solid var(--border2);border-radius:14px;padding:16px 22px;text-align:center;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s;}
+.stat-chip:hover{border-color:rgba(168,85,247,0.35);transform:translateY(-2px);}
+.stat-chip .num{font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;background:linear-gradient(135deg,var(--purple),#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-chip .lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+
+/* SEC LABEL */
+.sec-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--text3);}
+
+/* PERSONA SELECTOR */
+.persona-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:20px 0 28px;}
+.persona-card{background:rgba(11,26,49,0.8);border:1.5px solid var(--border);border-radius:16px;padding:18px 12px;text-align:center;cursor:pointer;transition:all .3s;backdrop-filter:blur(8px);position:relative;overflow:hidden;}
+.persona-card::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .3s;}
+.persona-card:hover{transform:translateY(-4px);border-color:var(--border2);}
+.persona-card:hover::before{opacity:1;}
+.persona-card.active{transform:translateY(-5px);}
+.persona-icon{font-size:28px;margin-bottom:10px;display:block;transition:transform .3s;}
+.persona-card:hover .persona-icon,.persona-card.active .persona-icon{transform:scale(1.12);}
+.persona-name{font-size:11px;font-weight:700;color:#fff;line-height:1.35;margin-bottom:3px;}
+.persona-tag{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.3px;}
+.persona-check{position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--navy);}
+.persona-card.active .persona-check{display:flex;}
+
+.persona-card[data-persona="0"].active{border-color:rgba(0,232,122,0.5);background:rgba(0,232,122,0.06);}
+.persona-card[data-persona="0"].active .persona-check{background:var(--green);}
+.persona-card[data-persona="0"]::before{background:radial-gradient(ellipse at bottom,rgba(0,232,122,0.08),transparent);}
+.persona-card[data-persona="1"].active{border-color:rgba(26,140,255,0.5);background:rgba(26,140,255,0.06);}
+.persona-card[data-persona="1"].active .persona-check{background:var(--blue);}
+.persona-card[data-persona="1"]::before{background:radial-gradient(ellipse at bottom,rgba(26,140,255,0.08),transparent);}
+.persona-card[data-persona="2"].active{border-color:rgba(168,85,247,0.5);background:rgba(168,85,247,0.06);}
+.persona-card[data-persona="2"].active .persona-check{background:var(--purple);}
+.persona-card[data-persona="2"]::before{background:radial-gradient(ellipse at bottom,rgba(168,85,247,0.08),transparent);}
+.persona-card[data-persona="3"].active{border-color:rgba(255,203,71,0.5);background:rgba(255,203,71,0.06);}
+.persona-card[data-persona="3"].active .persona-check{background:var(--gold);}
+.persona-card[data-persona="3"]::before{background:radial-gradient(ellipse at bottom,rgba(255,203,71,0.08),transparent);}
+.persona-card[data-persona="4"].active{border-color:rgba(255,77,109,0.5);background:rgba(255,77,109,0.06);}
+.persona-card[data-persona="4"].active .persona-check{background:var(--red);}
+.persona-card[data-persona="4"]::before{background:radial-gradient(ellipse at bottom,rgba(255,77,109,0.08),transparent);}
+
+/* DASHBOARD PREVIEW */
+.dashboard-preview{background:rgba(11,26,49,0.85);border:1.5px solid var(--border2);border-radius:24px;overflow:hidden;backdrop-filter:blur(16px);box-shadow:0 32px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);transition:border-color .4s;}
+.dash-header{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.02);}
+.dash-greeting{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.dash-meta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.3px;}
+.dash-persona-badge{font-size:12px;font-weight:700;padding:6px 16px;border-radius:100px;border:1px solid;transition:all .4s;white-space:nowrap;}
+.dash-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px;transition:opacity .3s;}
+.dash-body.transitioning{opacity:0.3;}
+
+/* METRIC WIDGETS */
+.widget{background:rgba(5,14,31,0.6);border:1px solid var(--border);border-radius:14px;padding:18px;transition:border-color .3s;}
+.widget:hover{border-color:var(--border2);}
+.widget-label{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.widget-value{font-size:26px;font-weight:800;letter-spacing:-0.8px;line-height:1;transition:color .4s;}
+.widget-sub{font-size:12px;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+.widget-chg{font-size:11px;font-weight:700;margin-top:6px;font-family:var(--mono);}
+.chg-up{color:#00c465;}
+.chg-dn{color:#ff4d6d;}
+
+/* INSIGHT CARD */
+.insight-card{border-radius:14px;padding:18px 20px;grid-column:span 2;border:1px solid;transition:all .4s;}
+.insight-label{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;}
+.insight-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:-0.2px;}
+.insight-body{font-size:13px;color:var(--text2);line-height:1.65;}
+
+/* CHART WIDGETS */
+.chart-two-col{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.chart-widget{border-radius:14px;padding:18px;background:rgba(5,14,31,0.6);border:1px solid var(--border);}
+.chart-widget-full{border-radius:14px;padding:18px;grid-column:span 2;background:rgba(5,14,31,0.6);border:1px solid var(--border);}
+.chart-label{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.chart-sublabel{font-size:11px;color:var(--text3);margin-bottom:14px;font-family:var(--mono);}
+.chart-canvas-wrap{position:relative;width:100%;}
+.legend-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--text3);}
+.legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+
+/* BOTTOM SECTIONS */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:56px;align-items:start;}
+.step-flow{display:flex;flex-direction:column;gap:0;}
+.step-item-row{display:flex;gap:18px;align-items:flex-start;position:relative;}
+.step-item-row:not(:last-child)::after{content:'';position:absolute;left:18px;top:42px;width:2px;height:calc(100% + 4px);background:linear-gradient(to bottom,rgba(168,85,247,0.25),rgba(168,85,247,0.04));}
+.step-num-circle{width:38px;height:38px;border-radius:50%;background:rgba(168,85,247,0.08);border:1.5px solid rgba(168,85,247,0.25);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--purple);flex-shrink:0;transition:all .2s;}
+.step-item-row:hover .step-num-circle{background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.5);}
+.step-body{padding-bottom:28px;flex:1;}
+.step-body h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:5px;letter-spacing:-0.3px;}
+.step-body p{font-size:13px;color:var(--text2);line-height:1.65;}
+.step-last .step-num-circle{background:rgba(255,203,71,0.08);border-color:rgba(255,203,71,0.28);color:var(--gold);}
+
+.vs-card{border-radius:14px;padding:18px 20px;margin-bottom:12px;}
+.vs-us{background:rgba(0,232,122,0.04);border:1px solid rgba(0,232,122,0.16);}
+.vs-them{background:rgba(255,77,109,0.04);border:1px solid rgba(255,77,109,0.14);}
+.vs-card-label{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;}
+.vs-us .vs-card-label{color:var(--green);}
+.vs-them .vs-card-label{color:var(--red);}
+.vs-list{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.vs-list li{font-size:12.5px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;line-height:1.4;}
+.vs-us .vs-list li::before{content:"✓";color:var(--green);font-weight:800;flex-shrink:0;font-size:11px;}
+.vs-them .vs-list li::before{content:"✗";color:var(--red);font-weight:800;flex-shrink:0;font-size:11px;}
+
+.info-card{background:rgba(11,26,49,0.8);border:1px solid var(--border);border-radius:18px;padding:22px;backdrop-filter:blur(10px);transition:all .25s;margin-top:12px;}
+.info-card:hover{border-color:rgba(168,85,247,0.2);transform:translateY(-2px);}
+.limit-box{background:rgba(255,203,71,0.04);border:1px solid rgba(255,203,71,0.18);border-radius:14px;padding:18px 22px;margin-top:12px;}
+.limit-box h5{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;}
+.limit-box p{font-size:12.5px;color:var(--text2);line-height:1.65;}
+.proto-notice{display:flex;align-items:flex-start;gap:14px;background:rgba(26,140,255,0.05);border:1px solid rgba(26,140,255,0.16);border-radius:14px;padding:16px 20px;margin-top:48px;}
+.proto-notice p{font-size:12.5px;color:var(--text3);line-height:1.7;}
+.proto-notice p strong{color:var(--blue);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.anim-up{animation:fadeUp .65s ease both;}
+.anim-up-2{animation:fadeUp .65s ease 0.1s both;}
+.anim-up-3{animation:fadeUp .65s ease 0.2s both;}
+
+@media(max-width:960px){
+  .page-wrap{padding:40px 20px 80px;}
+  .proto-pages{display:none;}
+  .persona-grid{grid-template-columns:repeat(3,1fr);}
+  .dash-body{grid-template-columns:1fr;}
+  .insight-card,.chart-widget-full,.chart-two-col{grid-column:span 1;}
+  .chart-two-col{grid-template-columns:1fr;}
+  .dash-header{flex-direction:column;align-items:flex-start;gap:12px;}
+  .bottom-grid{grid-template-columns:1fr;}
+}
+@media(max-width:500px){
+  .persona-grid{grid-template-columns:repeat(2,1fr);}
+  .stat-strip{gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-orb"></div>
+
+
+
+<div class="page-wrap">
+
+  <div class="page-hero anim-up">
+
+    <h1 class="page-h1">AI Spending<br><em>Persona Dashboard</em></h1>
+    <p class="page-sub">
+      SpendWise classifies every user into one of <strong>5 distinct financial behaviour personas</strong> drawn from CW1 target market analysis — then renders a completely personalised dashboard with live charts. No two users ever see the same layout.
+    </p>
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="num">5</div><div class="lbl">AI persona types</div></div>
+      <div class="stat-chip"><div class="num">30</div><div class="lbl">Days to first classify</div></div>
+      <div class="stat-chip"><div class="num">0</div><div class="lbl">Generic templates</div></div>
+      <div class="stat-chip"><div class="num">7d</div><div class="lbl">Re-classify cycle</div></div>
+    </div>
+  </div>
+
+  <div class="anim-up-2">
+    <div class="sec-label">Select a Persona — Preview its Personalised Dashboard</div>
+    <div class="persona-grid">
+      <div class="persona-card active" data-persona="0" onclick="setPersona(0,this)">
+        <span class="persona-check">✓</span>
+        <div class="persona-icon">📍</div>
+        <div class="persona-name">Geolocation-Based Saver</div>
+        <div class="persona-tag">Wants location deals</div>
+      </div>
+      <div class="persona-card" data-persona="1" onclick="setPersona(1,this)">
+        <span class="persona-check">✓</span>
+        <div class="persona-icon">📊</div>
+        <div class="persona-name">Financial Allocator</div>
+        <div class="persona-tag">Budget by category</div>
+      </div>
+      <div class="persona-card" data-persona="2" onclick="setPersona(2,this)">
+        <span class="persona-check">✓</span>
+        <div class="persona-icon">🏷️</div>
+        <div class="persona-name">Category Manager</div>
+        <div class="persona-tag">Tracks specific spends</div>
+      </div>
+      <div class="persona-card" data-persona="3" onclick="setPersona(3,this)">
+        <span class="persona-check">✓</span>
+        <div class="persona-icon">🛒</div>
+        <div class="persona-name">Grocery Optimiser</div>
+        <div class="persona-tag">Supermarket-focused</div>
+      </div>
+      <div class="persona-card" data-persona="4" onclick="setPersona(4,this)">
+        <span class="persona-check">✓</span>
+        <div class="persona-icon">🎯</div>
+        <div class="persona-name">Discount Seeker</div>
+        <div class="persona-tag">Hunts every deal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-preview anim-up-3" id="dashboard-wrap">
+    <div class="dash-header">
+      <div>
+        <div class="dash-greeting" id="greeting">Good morning, Ravindu 👋</div>
+        <div class="dash-meta" id="dash-meta">TUESDAY · 1 APRIL 2026 · COLOMBO, LK</div>
+      </div>
+      <div class="dash-persona-badge" id="persona-badge">📍 Geolocation-Based Saver</div>
+    </div>
+    <div class="dash-body" id="dash-body"></div>
+  </div>
+
+  <div class="bottom-grid">
+    <div>
+      <div class="sec-label">How AI Classification Works</div>
+      <div class="step-flow" style="margin-top:4px;">
+        <div class="step-item-row">
+          <div class="step-num-circle">1</div>
+          <div class="step-body">
+            <h4>Transaction Ingestion — Days 1–30</h4>
+            <p>All auto-parsed SMS transactions are stored with merchant, category, time-of-day, day-of-week, and location metadata. The first 30 days build the baseline profile — no persona is assigned yet; user sees a generic dashboard.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">2</div>
+          <div class="step-body">
+            <h4>Behaviour Vector Scoring</h4>
+            <p>Algorithm scores the user on 5 axes: location-sensitivity, budget-discipline, category-concentration, grocery-frequency, and discount-redemption rate. The highest-scoring axis determines the primary persona assignment.</p>
+          </div>
+        </div>
+        <div class="step-item-row">
+          <div class="step-num-circle">3</div>
+          <div class="step-body">
+            <h4>Dashboard Layout Personalisation</h4>
+            <p>Persona determines which widgets and charts appear first. Geolocation Savers see savings trends and store comparisons; Financial Allocators see budget usage bars and spend-vs-target lines; Grocery Optimisers see store price comparisons front and centre.</p>
+          </div>
+        </div>
+        <div class="step-item-row step-last">
+          <div class="step-num-circle">4</div>
+          <div class="step-body">
+            <h4>Weekly Re-Classification</h4>
+            <p>Persona is re-evaluated every 7 days. If spending behaviour shifts — e.g. user starts using more discounts — persona updates automatically. Users can also manually override their persona assignment in Settings.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec-label">Why This Differentiates SpendWise</div>
+      <div class="vs-card vs-us">
+        <div class="vs-card-label">SpendWise — Personalised by Behaviour</div>
+        <ul class="vs-list">
+          <li>Dashboard adapts to YOUR spending style</li>
+          <li>5 persona types from real CW1 user research</li>
+          <li>AI re-classifies weekly as habits evolve</li>
+          <li>Charts are specific to your data, not averages</li>
+          <li>User can manually correct their persona</li>
+        </ul>
+      </div>
+      <div class="vs-card vs-them">
+        <div class="vs-card-label">Mint / FREMI / Toshl — One Size for All</div>
+        <ul class="vs-list">
+          <li>Same pie chart for every single user</li>
+          <li>No persona or behaviour classification</li>
+          <li>Advice based on global averages, not you</li>
+          <li>Zero personalisation of layout or charts</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <div class="sec-label">Traceability</div>
+        <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-top:4px;">The five personas are derived from the defined target market. The personalisation engine implements FR-02 (personalised insights), aligns with CSF-03 (algorithm quality driving user retention), and demonstrates the SWOT SO-1 strategy by leveraging AI to create switching costs against competitors.</p>
+      </div>
+      <div class="limit-box">
+        <h5>⚠ Prototype Limitation</h5>
+        <p>Clicking a persona shows a pre-designed dashboard state with simulated chart data. Full production requires a trained ML model (k-means clustering or decision tree on transaction vectors), real transaction data, and a backend inference API that drives chart data per user session in real time.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="proto-notice">
+    <span style="font-size:15px;flex-shrink:0;">ℹ️</span>
+    <p><strong>Prototype Note:</strong> The persona selector above demonstrates 5 different dashboard states using simulated data. Each panel shows the widget layout, chart types, and insight content that a user of that persona type would see. Full implementation requires an ML classification pipeline, real transaction data, Chart.js connected to a live backend, and a dynamic widget rendering engine.</p>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);">
+    <a href="alerts.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">← Page 01: Real-Time Alerts</a>
+    <a href="sms-tracking.html" style="font-size:13px;color:var(--green);text-decoration:none;font-weight:600;">Page 03: SMS Transaction Feed →</a>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const GRID  = 'rgba(255,255,255,0.06)';
+const TICK  = 'rgba(255,255,255,0.35)';
+
+const personas = [
+  {
+    id:0, name:'📍 Geolocation-Based Saver', greeting:'Good morning, Ravindu 👋',
+    color:'#00e87a', dimColor:'rgba(0,232,122,0.18)',
+    borderColor:'rgba(0,232,122,0.3)', badgeBg:'rgba(0,232,122,0.1)',
+    badgeBorder:'rgba(0,232,122,0.25)',
+    insightBg:'rgba(0,232,122,0.05)', insightBorder:'rgba(0,232,122,0.18)',
+    metrics:[
+      {label:'Saved This Month',  value:'LKR 3,240', sub:'12 alerts acted on',          chg:'+18% vs last month', up:true},
+      {label:'Nearest Deal Now',  value:'380m away',  sub:'Cargills — 25% off produce',  chg:'Save LKR 840 today',  up:true},
+      {label:'Budget Remaining',  value:'LKR 2,200', sub:'Groceries — 22% left',         chg:'Alert fires at 90%',  up:true},
+      {label:'Alerts This Week',  value:'7',          sub:'3 accepted · 4 dismissed',    chg:'Best: LKR 1,100',     up:true}
+    ],
+    insight:{
+      title:'You save most on Tuesday mornings',
+      body:'Your last 8 Cargills visits before 10am coincide with their fresh produce markdowns. A Tuesday/Thursday reminder could add LKR 600/month to your savings total.'
+    },
+    charts:[
+      {
+        id:'c0a', type:'bar', title:'Weekly savings captured', sub:'LKR saved per week by acting on alerts',
+        legend:[{color:'#00e87a',label:'LKR saved'}],
+        build: function(ctx,col,dim){
+          return new Chart(ctx,{type:'bar',data:{labels:['Wk 1','Wk 2','Wk 3','Wk 4'],datasets:[{data:[820,1240,640,1080],backgroundColor:[dim,col,dim,col],borderRadius:6,barPercentage:0.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(0)+'k'}}}}});
+        }
+      },
+      {
+        id:'c0b', type:'bar', title:'Your basket across stores', sub:'Estimated LKR cost for usual grocery list',
+        legend:[{color:'#00e87a',label:'Cheapest'},{color:'rgba(0,232,122,0.18)',label:'Other stores'}],
+        build: function(ctx,col,dim){
+          const vals=[4200,3360,4050,3100];
+          const min=Math.min(...vals);
+          return new Chart(ctx,{type:'bar',data:{labels:['Keells','Cargills','Arpico','L. Sathosa'],datasets:[{data:vals,backgroundColor:vals.map(v=>v===min?col:dim),borderRadius:6,barPercentage:0.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(0)+'k'},suggestedMin:2800}}}});
+        }
+      }
+    ]
+  },
+  {
+    id:1, name:'📊 Financial Allocator', greeting:'Good morning, Kasun 👋',
+    color:'#1a8cff', dimColor:'rgba(26,140,255,0.18)',
+    borderColor:'rgba(26,140,255,0.3)', badgeBg:'rgba(26,140,255,0.1)',
+    badgeBorder:'rgba(26,140,255,0.25)',
+    insightBg:'rgba(26,140,255,0.05)', insightBorder:'rgba(26,140,255,0.18)',
+    metrics:[
+      {label:'Total Budget Used',   value:'68%',        sub:'LKR 34,000 of LKR 50,000',   chg:'+5% vs last month',  up:false},
+      {label:'Largest Overspend',   value:'Dining',     sub:'LKR 2,880 over limit',        chg:'+24% over budget',   up:false},
+      {label:'Categories On Track', value:'4 of 6',     sub:'Groceries, Fuel, Health, Bills', chg:'2 at risk',       up:false},
+      {label:'Projected Month-End', value:'LKR 51,200', sub:'vs LKR 50,000 budget',        chg:'LKR 1,200 over',     up:false}
+    ],
+    insight:{
+      title:'Dining is your only budget risk with 8 days left',
+      body:'You\'ve spent LKR 14,880 on dining vs your LKR 12,000 limit. Cutting 3 restaurant meals this week saves you from going over. SpendWise will alert before your next dining transaction.'
+    },
+    charts:[
+      {
+        id:'c1a', type:'bar', title:'Budget usage by category', sub:'% of monthly limit used — red = over budget',
+        legend:[{color:'#ff4d6d',label:'Over budget'},{color:'#ffcb47',label:'Near limit'},{color:'#1a8cff',label:'On track'}],
+        build: function(ctx,col,dim){
+          const vals=[55,124,80,60,45,72];
+          const cols=vals.map(v=>v>100?'#ff4d6d':v>80?'#ffcb47':col);
+          return new Chart(ctx,{type:'bar',data:{labels:['Groceries','Dining','Fuel','Transport','Health','Bills'],datasets:[{data:vals,backgroundColor:cols,borderRadius:6,barPercentage:0.65}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>Math.round(c.parsed.y)+'% of budget'}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:10}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>v+'%'},suggestedMax:140}}}});
+        }
+      },
+      {
+        id:'c1b', type:'line', title:'Daily spend vs. daily target', sub:'LKR — this week',
+        legend:[{color:'#1a8cff',label:'Daily spend'},{color:'#ff4d6d',label:'Daily target (LKR 1,667)'}],
+        build: function(ctx,col,dim){
+          return new Chart(ctx,{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Spend',data:[1200,2100,900,1600,800,1400,2400],borderColor:col,backgroundColor:dim,tension:0.4,fill:true,pointBackgroundColor:col,pointRadius:4,borderWidth:2},{label:'Target',data:[1667,1667,1667,1667,1667,1667,1667],borderColor:'#ff4d6d',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(1)+'k'}}}}});
+        }
+      }
+    ]
+  },
+  {
+    id:2, name:'🏷️ Category Manager', greeting:'Good morning, Dilshan 👋',
+    color:'#a855f7', dimColor:'rgba(168,85,247,0.18)',
+    borderColor:'rgba(168,85,247,0.3)', badgeBg:'rgba(168,85,247,0.1)',
+    badgeBorder:'rgba(168,85,247,0.25)',
+    insightBg:'rgba(168,85,247,0.05)', insightBorder:'rgba(168,85,247,0.18)',
+    metrics:[
+      {label:'Clothing This Month',  value:'LKR 8,400',  sub:'Target: LKR 10,000',          chg:'On track',             up:true},
+      {label:'Entertainment Spend',  value:'LKR 3,200',  sub:'Down from LKR 3,900',          chg:'-18% vs last month',   up:true},
+      {label:'Top Category',         value:'Clothing',   sub:'35% of discretionary spend',   chg:'Peak: mid-month',      up:false},
+      {label:'Category Alerts',      value:'2 active',   sub:'Dining, Shopping near limit',  chg:'Review now',           up:false}
+    ],
+    insight:{
+      title:'Clothing spend peaks every month between 12th–18th',
+      body:'Odel and H&M run their best discounts in week 1. Shopping earlier each month saves an estimated LKR 1,200 — SpendWise can remind you on the 2nd of each month.'
+    },
+    charts:[
+      {
+        id:'c2a', type:'doughnut', title:'Spend by category this month', sub:'LKR breakdown — total LKR 35,400',
+        legend:[
+          {color:'#a855f7',label:'Clothing 24%'},{color:'#00e87a',label:'Groceries 34%'},
+          {color:'#ffcb47',label:'Dining 15%'},{color:'#1a8cff',label:'Fuel 13%'},
+          {color:'#ff4d6d',label:'Entertain 9%'},{color:'#5a7a9e',label:'Other 6%'}
+        ],
+        build: function(ctx){
+          return new Chart(ctx,{type:'doughnut',data:{labels:['Clothing','Groceries','Dining','Fuel','Entertainment','Other'],datasets:[{data:[8400,12000,5200,4500,3200,2100],backgroundColor:['#a855f7','#00e87a','#ffcb47','#1a8cff','#ff4d6d','#5a7a9e'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.toLocaleString()}}}}});
+        }
+      },
+      {
+        id:'c2b', type:'bar', title:'Category vs prior month', sub:'LKR — this month vs last month',
+        legend:[{color:'#a855f7',label:'This month'},{color:'rgba(168,85,247,0.2)',label:'Last month'}],
+        build: function(ctx,col,dim){
+          return new Chart(ctx,{type:'bar',data:{labels:['Clothing','Dining','Groceries','Entertain','Fuel'],datasets:[{label:'This month',data:[8400,5200,12000,3200,4500],backgroundColor:col,borderRadius:4,barPercentage:0.45},{label:'Last month',data:[7200,5800,11500,3900,4200],backgroundColor:dim,borderRadius:4,barPercentage:0.45}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:10}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(0)+'k'}}}}});
+        }
+      }
+    ]
+  },
+  {
+    id:3, name:'🛒 Grocery Optimiser', greeting:'Good morning, Nimesha 👋',
+    color:'#ffcb47', dimColor:'rgba(255,203,71,0.18)',
+    borderColor:'rgba(255,203,71,0.3)', badgeBg:'rgba(255,203,71,0.1)',
+    badgeBorder:'rgba(255,203,71,0.25)',
+    insightBg:'rgba(255,203,71,0.05)', insightBorder:'rgba(255,203,71,0.18)',
+    metrics:[
+      {label:'Grocery Spend',     value:'LKR 18,600', sub:'vs LKR 22,400 last month',  chg:'-17% saved',            up:true},
+      {label:'Stores Visited',    value:'4 stores',   sub:'Keells, Cargills, Arpico, Sathosa', chg:'Best: L. Sathosa', up:true},
+      {label:'Avg Basket Size',   value:'LKR 3,100',  sub:'vs LKR 3,730 last month',   chg:'-LKR 630 per trip',     up:true},
+      {label:'Best Deal Found',   value:'LKR 760',    sub:'Switching to Lanka Sathosa', chg:'Per big-shop trip',     up:true}
+    ],
+    insight:{
+      title:'Lanka Sathosa is cheapest for your top-10 items',
+      body:'Your typical basket: Keells LKR 4,200 — Cargills LKR 3,360 — Lanka Sathosa LKR 3,100. Switching your monthly big shop saves LKR 760 per trip, or LKR 9,120 per year.'
+    },
+    charts:[
+      {
+        id:'c3a', type:'bar', title:'Basket price across stores', sub:'Your usual 10-item grocery list — LKR',
+        legend:[{color:'#ffcb47',label:'Cheapest store'},{color:'rgba(255,203,71,0.2)',label:'Other stores'}],
+        build: function(ctx,col,dim){
+          const vals=[4200,3360,4050,3100];
+          const min=Math.min(...vals);
+          return new Chart(ctx,{type:'bar',data:{labels:['Keells','Cargills','Arpico','L. Sathosa'],datasets:[{data:vals,backgroundColor:vals.map(v=>v===min?col:dim),borderRadius:6,barPercentage:0.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(0)+'k'},suggestedMin:2800}}}});
+        }
+      },
+      {
+        id:'c3b', type:'line', title:'Monthly grocery spend trend', sub:'LKR — last 5 months',
+        legend:[{color:'#ffcb47',label:'Monthly grocery spend'}],
+        build: function(ctx,col,dim){
+          return new Chart(ctx,{type:'line',data:{labels:['Nov','Dec','Jan','Feb','Mar'],datasets:[{data:[24100,21800,23400,22400,18600],borderColor:col,backgroundColor:dim,tension:0.4,fill:true,pointBackgroundColor:col,pointRadius:5,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(0)+'k'}}}}});
+        }
+      }
+    ]
+  },
+  {
+    id:4, name:'🎯 Discount Seeker', greeting:'Good morning, Tharaka 👋',
+    color:'#ff4d6d', dimColor:'rgba(255,77,109,0.18)',
+    borderColor:'rgba(255,77,109,0.3)', badgeBg:'rgba(255,77,109,0.1)',
+    badgeBorder:'rgba(255,77,109,0.25)',
+    insightBg:'rgba(255,77,109,0.05)', insightBorder:'rgba(255,77,109,0.18)',
+    metrics:[
+      {label:'Discounts Claimed',   value:'23',          sub:'This month so far',           chg:'LKR 5,840 total saved', up:true},
+      {label:'Best Deal Caught',    value:'LKR 1,200 off', sub:'Arpico appliance sale',     chg:'Top saving this month',  up:true},
+      {label:'Deals Expiring Soon', value:'4 deals',     sub:'Within 2 days',               chg:'Act now',               up:false},
+      {label:'Avg Saving per Deal', value:'LKR 254',     sub:'vs LKR 210 last month',       chg:'+21% better',           up:true}
+    ],
+    insight:{
+      title:'4 discounts expire in 48 hours',
+      body:'FoodCity 20% off bakery, Pizza Hut BOGO Tuesday, Cargills 15% off dairy, Odel 30% off apparel end-of-season. Tap each to set a reminder or navigate directly to the store.'
+    },
+    charts:[
+      {
+        id:'c4a', type:'bar', title:'Savings by category this month', sub:'LKR saved through discount alerts per category',
+        legend:[{color:'#ff4d6d',label:'LKR saved'}],
+        build: function(ctx,col,dim){
+          const vals=[2100,840,600,1200,300];
+          const max=Math.max(...vals);
+          return new Chart(ctx,{type:'bar',data:{labels:['Groceries','Dining','Clothing','Appliances','Fuel'],datasets:[{data:vals,backgroundColor:vals.map(v=>v===max?col:dim),borderRadius:6,barPercentage:0.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'LKR '+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:10}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11},callback:v=>'LKR '+(v/1000).toFixed(1)+'k'}}}}});
+        }
+      },
+      {
+        id:'c4b', type:'bar', title:'Deal activity this week', sub:'Number of discount alerts accepted per day',
+        legend:[{color:'#ff4d6d',label:'Peak day'},{color:'rgba(255,77,109,0.2)',label:'Other days'}],
+        build: function(ctx,col,dim){
+          const vals=[2,4,1,5,3,6,2];
+          const max=Math.max(...vals);
+          return new Chart(ctx,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:vals,backgroundColor:vals.map(v=>v===max?col:dim),borderRadius:6,barPercentage:0.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+' deals accepted'}}},scales:{x:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}}},y:{grid:{color:GRID},ticks:{color:TICK,font:{size:11}},stepSize:1}}}});
+        }
+      }
+    ]
+  }
+];
+
+let activeCharts = [];
+
+function destroyCharts(){
+  activeCharts.forEach(c=>{try{c.destroy()}catch(e){}});
+  activeCharts=[];
+}
+
+function buildMetrics(p){
+  return p.metrics.map(m=>`
+    <div class="widget">
+      <div class="widget-label">${m.label}</div>
+      <div class="widget-value" style="color:${p.color}">${m.value}</div>
+      <div class="widget-sub">${m.sub}</div>
+      <div class="widget-chg ${m.up?'chg-up':'chg-dn'}">${m.chg}</div>
+    </div>`).join('');
+}
+
+function buildInsight(p){
+  return `<div class="insight-card" style="background:${p.insightBg};border-color:${p.insightBorder};grid-column:span 2">
+    <div class="insight-label" style="color:${p.color}">💡 AI Insight</div>
+    <div class="insight-title">${p.insight.title}</div>
+    <div class="insight-body">${p.insight.body}</div>
+  </div>`;
+}
+
+function buildLegend(items){
+  return `<div class="legend-row">${items.map(i=>`
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${i.color}"></div>${i.label}
+    </div>`).join('')}</div>`;
+}
+
+function buildChartsHTML(p){
+  const c1=p.charts[0], c2=p.charts[1];
+  return `<div class="chart-two-col">
+    <div class="chart-widget">
+      <div class="chart-label">${c1.title}</div>
+      <div class="chart-sublabel">${c1.sub}</div>
+      ${buildLegend(c1.legend)}
+      <div class="chart-canvas-wrap" style="height:180px"><canvas id="${c1.id}"></canvas></div>
+    </div>
+    <div class="chart-widget">
+      <div class="chart-label">${c2.title}</div>
+      <div class="chart-sublabel">${c2.sub}</div>
+      ${buildLegend(c2.legend)}
+      <div class="chart-canvas-wrap" style="height:180px"><canvas id="${c2.id}"></canvas></div>
+    </div>
+  </div>`;
+}
+
+function renderCharts(p){
+  const c1=p.charts[0], c2=p.charts[1];
+  const ctx1=document.getElementById(c1.id).getContext('2d');
+  const ctx2=document.getElementById(c2.id).getContext('2d');
+  if(p.id===2){
+    activeCharts.push(c1.build(ctx1));
+    activeCharts.push(c2.build(ctx2,p.color,p.dimColor));
+  } else {
+    activeCharts.push(c1.build(ctx1,p.color,p.dimColor));
+    activeCharts.push(c2.build(ctx2,p.color,p.dimColor));
+  }
+}
+
+function setPersona(i, el){
+  destroyCharts();
+  document.querySelectorAll('.persona-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+
+  const p=personas[i];
+  document.getElementById('greeting').textContent=p.greeting;
+
+  const badge=document.getElementById('persona-badge');
+  badge.textContent=p.name;
+  badge.style.background=p.badgeBg;
+  badge.style.borderColor=p.badgeBorder;
+  badge.style.color=p.color;
+
+  const wrap=document.getElementById('dashboard-wrap');
+  wrap.style.borderColor=p.borderColor;
+
+  const body=document.getElementById('dash-body');
+  body.classList.add('transitioning');
+
+  setTimeout(()=>{
+    body.innerHTML = buildMetrics(p) + buildInsight(p) + buildChartsHTML(p);
+    body.classList.remove('transitioning');
+
+    if(window.innerWidth<=960){
+      body.querySelectorAll('.insight-card,.chart-two-col').forEach(el=>{
+        el.style.gridColumn='span 1';
+      });
+    }
+
+    requestAnimationFrame(()=>{ renderCharts(p); });
+  },220);
+}
+
+window.addEventListener('resize',()=>{
+  const activeIdx=Array.from(document.querySelectorAll('.persona-card')).findIndex(c=>c.classList.contains('active'));
+  if(activeIdx>=0) setPersona(activeIdx, document.querySelectorAll('.persona-card')[activeIdx]);
+});
+
+setPersona(0, document.querySelector('.persona-card'));
+</script>
+</body>
+</html>
